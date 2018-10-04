@@ -1,14 +1,18 @@
 package pearl
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func makeDockerFile() {
+	docker_file_static = docker_file_static + "RUN pip install --user " + readRQFileIntoOneLine("data/model/requirements.txt")
 	writeToFiles(docker_file_static, "Dockerfile")
 	writeToFiles(docker_compose_static, "docker-compose.yml")
+	writeToFiles("", ".dockerignore")
 
 }
 
@@ -22,6 +26,28 @@ func writeToFiles(content string, filename string) {
 	defer fd.Close()
 
 	fmt.Fprintf(fd, content)
+}
+
+func readRQFileIntoOneLine(filepath string) string {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	var stringArray []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		stringArray = append(stringArray, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return strings.Join(stringArray, " ")
 }
 
 var docker_file_static = `FROM nvidia/cuda:9.0-cudnn7-devel
@@ -46,15 +72,11 @@ RUN useradd -m -s /bin/bash -N -u 1000 $USER && \
 
 RUN pip install --upgrade pip
 
-COPY /meta/requirements.txt $MODELPATH/requirements.txt
-
 USER $USER
 WORKDIR $MODELPATH 
 
-RUN pip install -r requirements.txt --user
-
-
 EXPOSE 5000
+
 `
 
 var docker_compose_static = `version: "2.4"
@@ -63,16 +85,16 @@ services:
     build:
      context: ./
     ports:
-    - '5000'
+    - '5000:5000'
     volumes:
-        - /data/model:/data
+        - './data/model:/src'
     links:
       - redis
     command: python3.6 hello.py
   redis:
     image: redis:alpine
     volumes:
-      - '/data/redis:/data'
+      - './data/redis:/data'
     ports:
       - "6379"
 `
