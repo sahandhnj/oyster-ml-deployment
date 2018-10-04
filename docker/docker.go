@@ -8,11 +8,18 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"golang.org/x/net/context"
+
+	"github.com/docker/libcompose/docker"
+	"github.com/docker/libcompose/docker/ctx"
+	"github.com/docker/libcompose/project"
+	"github.com/docker/libcompose/project/options"
 )
 
 type DockerCli struct {
@@ -38,6 +45,31 @@ func (c *DockerCli) ListContainers() {
 
 	for _, container := range containers {
 		fmt.Println(container.Names)
+	}
+}
+
+func (c *DockerCli) DeployStack() {
+	project, err := docker.NewProject(&ctx.Context{
+		Context: project.Context{
+			ComposeFiles: []string{"docker-compose.yml"},
+			ProjectName:  "oysterproject",
+		},
+	}, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = project.Build(context.Background(), options.Build{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = project.Up(context.Background(), options.Up{})
+
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -96,6 +128,7 @@ func (c *DockerCli) CreateContainer() {
 			Remove:     true,
 			Tags:       []string{"oysterimage"},
 		})
+
 	if err != nil {
 		log.Fatal(err, " :unable to build docker image")
 	}
@@ -106,11 +139,25 @@ func (c *DockerCli) CreateContainer() {
 		log.Fatal(err, " :unable to read image build response")
 	}
 
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	resp, err := c.cli.ContainerCreate(ctx, &container.Config{
-		Image: "my-docker-image",
-		Cmd:   []string{"python", "file.py"},
+		Image: "oysterimage",
+		Cmd:   []string{"python", "/workspace/hello.py"},
 		Tty:   true,
-	}, nil, nil, "")
+	}, &container.HostConfig{
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: path.Join(dir, "workspace"),
+				Target: "/src",
+			},
+		},
+	}, nil, "")
+
 	if err != nil {
 		panic(err)
 	}

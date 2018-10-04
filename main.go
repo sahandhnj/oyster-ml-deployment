@@ -34,9 +34,6 @@ func main() {
 				pearl.PrintInfo()
 				pearl.Config()
 
-				dc := docker.NewDockerCli()
-				dc.CreateContainer()
-
 				return nil
 			},
 			Flags: []cli.Flag{
@@ -67,6 +64,18 @@ func main() {
 			Name:    "deploy",
 			Aliases: []string{"d"},
 			Usage:   "deploy the model",
+			Action: func(c *cli.Context) error {
+				pearl := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
+				pearl.PrintInfo()
+				pearl.Config()
+
+				fmt.Println("Deploying docker image")
+
+				dc := docker.NewDockerCli()
+				dc.DeployStack()
+
+				return nil
+			},
 		},
 		{
 			Name:    "list",

@@ -18,7 +18,6 @@ func NewPearl(name string, desc string, modelPath string) *Pearl {
 
 func (p *Pearl) Config() {
 	makeDockerFile()
-
 }
 
 func (p *Pearl) PrintInfo() {
