@@ -60,11 +60,11 @@ func (c *DockerCli) DeployStack() {
 		log.Fatal(err)
 	}
 
-	// err = project.Build(context.Background(), options.Build{})
+	err = project.Build(context.Background(), options.Build{})
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("It reaches here")
 	err = project.Up(context.Background(), options.Up{})
