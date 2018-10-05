@@ -3,8 +3,11 @@ import numpy
 from keras.preprocessing import sequence
 from keras.models import model_from_json
 import keras
+from flask import Flask, request
 
 numpy.random.seed(7)
+
+app = Flask(__name__)
 
 
 def load_model(model_file_path, weights_file_path):
@@ -19,6 +22,7 @@ def load_model(model_file_path, weights_file_path):
     print("Loaded model from disk and inserted weights.")
 
     return loaded_model
+
 
 
 # Data preprocessing
@@ -47,16 +51,33 @@ def preprocessing(sentence):
     prepped_data = sequence_padding(sentence)
     return prepped_data
 
-
-
-
 # Perform all steps
 # 1. Load model
 model = load_model('model.json', 'model_weights.h5')
-# 2. retrieve input
-user_input = "i really love having fun coding"
-# 3. preprocess data
-data = preprocessing(user_input[0])
-# 4. output results (should become api)
-preds = model.predict(data)
-print("Sentiment: {}".format(preds))
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    # 2. retrieve input
+    user_input = request.json['text']
+    #user_input = "n the movie was terrible"
+    # print(user_input)
+    # 3. preprocess data
+    data = preprocessing(user_input[0])
+    # print(data)
+
+    # 4. output results (should become api)
+    with graph.as_default():
+        preds = model.predict(data)
+
+    print("Sentiment: {}".format(preds))
+    return "Sentiment: {}".format(preds)
+
+
+@app.route("/")
+def hello():
+    return "Hello World!"
+
+if __name__ == "__main__":
+    print(("* Loading Keras model and Flask starting server..."
+        "please wait until server has fully started"))
+    app.run(host="0.0.0.0", port=int("5000"), debug=True)
