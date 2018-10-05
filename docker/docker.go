@@ -48,8 +48,8 @@ func (c *DockerCli) ListContainers() {
 	}
 }
 
-func (c *DockerCli) DeployStack() {
-	project, err := docker.NewProject(&ctx.Context{
+func (c *DockerCli) DeployStack() []string {
+	myproject, err := docker.NewProject(&ctx.Context{
 		Context: project.Context{
 			ComposeFiles: []string{"docker-compose.yml"},
 			ProjectName:  "oysterproject",
@@ -60,20 +60,27 @@ func (c *DockerCli) DeployStack() {
 		log.Fatal(err)
 	}
 
-	err = project.Build(context.Background(), options.Build{})
+	// err = project.Build(context.Background(), options.Build{})
+
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	err = myproject.Up(context.Background(), options.Up{})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("It reaches here")
-	err = project.Up(context.Background(), options.Up{})
+	names, err := myproject.Containers(context.Background(), project.Filter{
+		State: project.Running,
+	})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	project.Log(context.Background(), true)
+	return names
 }
 
 func (c *DockerCli) ListImages() {
@@ -86,6 +93,17 @@ func (c *DockerCli) ListImages() {
 	for _, image := range images {
 		fmt.Println(image.Labels)
 	}
+}
+
+func (c *DockerCli) ShowLogs(ID string) {
+	ctx := context.Background()
+
+	out, err := c.cli.ContainerLogs(ctx, ID, types.ContainerLogsOptions{ShowStdout: true, Follow: true})
+	if err != nil {
+		panic(err)
+	}
+
+	io.Copy(os.Stdout, out)
 }
 
 func (c *DockerCli) CreateContainer() {

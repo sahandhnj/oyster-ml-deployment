@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -72,8 +73,15 @@ func main() {
 				fmt.Println("Deploying docker image")
 
 				dc := docker.NewDockerCli()
-				dc.DeployStack()
+				names := dc.DeployStack()
 
+				for _, id := range names {
+					fmt.Println("Reading logs of: ", id)
+					go dc.ShowLogs(id)
+				}
+
+				fmt.Print("Press 'Enter' to continue...")
+				bufio.NewReader(os.Stdin).ReadBytes('\n')
 				return nil
 			},
 		},
