@@ -34,7 +34,7 @@ app = Flask(__name__)
 # ALLOWED_EXTENSIONS = set(['txt', 'png', 'jpg', 'jpeg', 'wav'])
 
 # Redis variables
-rdb = redis.StrictRedis(host='localhost', port=6379, db=0)
+rdb = redis.StrictRedis(host='redis', port=6379, db=0)
 DATA_QUEUE = "data_queue"
 BATCH_SIZE = 32
 SERVER_SLEEP = 0.25
@@ -128,7 +128,7 @@ def predict():
                 break
             
             time.sleep(CLIENT_SLEEP)
-        data["succes"] = True
+        data["success"] = True
     
     return jsonify(data)    
 

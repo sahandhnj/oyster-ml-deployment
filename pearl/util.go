@@ -11,7 +11,7 @@ import (
 func makeDockerFile() {
 	docker_file_static = docker_file_static + "RUN pip install --user " + readRQFileIntoOneLine("data/model/requirements.txt")
 	writeToFiles(docker_file_static, "Dockerfile")
-	writeToFiles(docker_compose_static, "docker-compose.yml")
+	writeToFiles(docker_compose_static_redis, "docker-compose.yml")
 	writeToFiles("", ".dockerignore")
 
 }
@@ -167,7 +167,7 @@ services:
         - './data/model:/src'
     links:
       - redis
-    command: echo $PATH
+    command: python hello2.py
   redis:
     image: redis:alpine
     volumes:

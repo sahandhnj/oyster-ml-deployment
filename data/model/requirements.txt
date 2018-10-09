@@ -4,7 +4,6 @@ certifi==2018.8.24
 chardet==3.0.4
 Click==7.0
 cycler==0.10.0
-flasgger==0.9.1
 Flask==1.0.2
 gast==0.2.0
 grpcio==1.15.0
@@ -19,12 +18,8 @@ Keras-Preprocessing==1.0.5
 kiwisolver==1.0.1
 Markdown==3.0.1
 MarkupSafe==1.0
-matplotlib==3.0.0
 mistune==0.8.3
 numpy==1.15.2
-pandas==0.23.4
-Pillow==5.2.0
-pkg-resources==0.0.0
 protobuf==3.6.1
 pyparsing==2.2.1
 python-dateutil==2.7.3
@@ -32,14 +27,9 @@ pytz==2018.5
 PyYAML==3.13
 redis==2.10.6
 requests==2.19.1
-scikit-learn==0.20.0
 scipy==1.1.0
-seaborn==0.9.0
 six==1.11.0
-tensorboard==1.11.0
 tensorflow==1.11.0
 termcolor==1.1.0
-torch==0.4.1
-torchvision==0.2.1
 urllib3==1.23
 Werkzeug==0.14.1

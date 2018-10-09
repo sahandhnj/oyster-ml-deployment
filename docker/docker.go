@@ -95,7 +95,7 @@ func (c *DockerCli) DeployStack(prjname string) []string {
 	myproject, err := docker.NewProject(&ctx.Context{
 		Context: project.Context{
 			ComposeFiles: []string{"docker-compose.yml"},
-			ProjectName:  prjname,
+			// ProjectName:  prjname,
 		},
 	}, nil)
 
@@ -103,12 +103,12 @@ func (c *DockerCli) DeployStack(prjname string) []string {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Building the images")
-	err = myproject.Build(context.Background(), options.Build{})
+	// fmt.Println("Building the images")
+	// err = myproject.Build(context.Background(), options.Build{})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	fmt.Println("Upping the images")
 	err = myproject.Up(context.Background(), options.Up{})
