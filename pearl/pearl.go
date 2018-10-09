@@ -3,17 +3,32 @@ package pearl
 import (
 	"fmt"
 	"time"
+
+	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/yaml.v2"
 )
 
 type Pearl struct {
-	Name        string
-	CreatedAt   time.Time
-	Description string
-	ModelPath   string
+	ID          bson.ObjectId `bson:"_id" json:"id" yaml:"id"`
+	Name        string        `bson:"name" json:"name" yaml:"name"`
+	Description string        `bson:"description" json:"description" yaml:"description"`
+	ModelPath   string        `bson:"model_path" json:"model_path" yaml:"model_path"`
+	CreatedAt   time.Time     `bson:"created_at" json:"created_at" yaml:"created_at"`
 }
 
-func NewPearl(name string, desc string, modelPath string) *Pearl {
-	return &Pearl{name, time.Now(), desc, modelPath}
+func NewPearl(name string, desc string, modelPath string) (*Pearl, error) {
+	p := Pearl{bson.NewObjectId(), name, desc, modelPath, time.Now()}
+
+	yamlBytes, err := yaml.Marshal(p)
+	yamlString := string(yamlBytes[:])
+
+	writeToFiles(yamlString, "oyster.yml")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
 }
 
 func (p *Pearl) Config() {

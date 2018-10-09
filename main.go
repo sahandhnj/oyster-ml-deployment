@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/pearl"
 	"github.com/urfave/cli"
@@ -31,7 +32,23 @@ func main() {
 			Aliases: []string{"a"},
 			Usage:   "start a project",
 			Action: func(c *cli.Context) error {
-				pearl := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
+				name := uuid.New().String()
+				model := "model"
+				description := ""
+
+				if len(c.String("name")) > 0 {
+					name = c.String("name")
+				}
+
+				if len(c.String("modelPath")) > 0 {
+					model = c.String("modelPath")
+				}
+
+				if len(c.String("description")) > 0 {
+					description = c.String("description")
+				}
+
+				pearl, _ := pearl.NewPearl(name, description, model)
 				pearl.PrintInfo()
 				pearl.Config()
 
@@ -66,7 +83,7 @@ func main() {
 			Aliases: []string{"d"},
 			Usage:   "deploy the model",
 			Action: func(c *cli.Context) error {
-				pearl := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
+				pearl, _ := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
 				pearl.PrintInfo()
 				pearl.Config()
 

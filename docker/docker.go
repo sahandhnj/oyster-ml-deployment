@@ -60,12 +60,13 @@ func (c *DockerCli) DeployStack() []string {
 		log.Fatal(err)
 	}
 
-	// err = project.Build(context.Background(), options.Build{})
+	err = myproject.Build(context.Background(), options.Build{})
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	fmt.Println("Building the images")
 	err = myproject.Up(context.Background(), options.Up{})
 
 	if err != nil {
