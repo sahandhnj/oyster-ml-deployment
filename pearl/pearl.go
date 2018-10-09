@@ -2,6 +2,8 @@ package pearl
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"time"
 
 	"gopkg.in/mgo.v2/bson"
@@ -29,6 +31,24 @@ func NewPearl(name string, desc string, modelPath string) (*Pearl, error) {
 	}
 
 	return &p, nil
+}
+
+func ReadPearl() (*Pearl, error) {
+	data, err := ioutil.ReadFile("oyster.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var pearl Pearl
+	if err := pearl.Parse(data); err != nil {
+		log.Fatal(err)
+	}
+
+	return &pearl, nil
+}
+
+func (p *Pearl) Parse(data []byte) error {
+	return yaml.Unmarshal(data, p)
 }
 
 func (p *Pearl) Config() {

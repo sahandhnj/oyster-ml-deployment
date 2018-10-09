@@ -17,7 +17,7 @@ func main() {
 
 	app.Name = "Oysterbox"
 	app.Usage = "We deploy everyting"
-	app.Version = "0.0.1"
+	app.Version = "0.0.0.2"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -74,6 +74,8 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "show config",
 			Action: func(c *cli.Context) error {
+				pearl, _ := pearl.ReadPearl()
+				pearl.PrintInfo()
 
 				return nil
 			},
