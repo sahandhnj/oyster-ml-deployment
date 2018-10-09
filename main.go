@@ -85,17 +85,17 @@ func main() {
 			Aliases: []string{"d"},
 			Usage:   "deploy the model",
 			Action: func(c *cli.Context) error {
-				pearl, _ := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
-				pearl.PrintInfo()
-				pearl.Config()
+				p, _ := pearl.ReadPearl()
+				p.PrintInfo()
 
 				fmt.Println("Deploying docker image")
 
 				dc := docker.NewDockerCli()
-				names := dc.DeployStack()
+				names := dc.DeployStack(p.Name)
 
 				for _, id := range names {
 					fmt.Println("Reading logs of: ", id)
+					pearl.NewNode(p.ID, id, pearl.Running)
 					go dc.ShowLogs(id)
 				}
 
@@ -110,9 +110,24 @@ func main() {
 			Usage:   "list APIs",
 			Action: func(c *cli.Context) error {
 				fmt.Println("List of docker containers")
+				pearl, _ := pearl.ReadPearl()
 
 				dc := docker.NewDockerCli()
-				dc.ListContainers()
+				dc.ListStackContainers(pearl.Name)
+
+				return nil
+			},
+		},
+		{
+			Name:    "drop",
+			Aliases: []string{"l"},
+			Usage:   "drop all container APIs",
+			Action: func(c *cli.Context) error {
+				fmt.Println("Dropping docker containers")
+				pearl, _ := pearl.ReadPearl()
+
+				dc := docker.NewDockerCli()
+				dc.Drop(pearl.Name)
 
 				return nil
 			},
