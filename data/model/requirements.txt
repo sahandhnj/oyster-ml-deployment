@@ -1,0 +1,5 @@
+Flask==1.0.2
+h5py==2.8.0
+Keras==2.2.2
+tensorflow==1.11.0
+redis==2.10.6

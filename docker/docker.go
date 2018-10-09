@@ -48,11 +48,11 @@ func (c *DockerCli) ListContainers() {
 	}
 }
 
-func (c *DockerCli) DeployStack() []string {
+func (c *DockerCli) ListStackContainers(prjname string) []string {
 	myproject, err := docker.NewProject(&ctx.Context{
 		Context: project.Context{
 			ComposeFiles: []string{"docker-compose.yml"},
-			ProjectName:  "oysterproject",
+			ProjectName:  prjname,
 		},
 	}, nil)
 
@@ -60,12 +60,57 @@ func (c *DockerCli) DeployStack() []string {
 		log.Fatal(err)
 	}
 
-	// err = project.Build(context.Background(), options.Build{})
+	names, err := myproject.Containers(context.Background(), project.Filter{
+		State: project.AnyState,
+	})
 
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	return names
+}
+
+func (c *DockerCli) Drop(prjname string) {
+	myproject, err := docker.NewProject(&ctx.Context{
+		Context: project.Context{
+			ComposeFiles: []string{"docker-compose.yml"},
+		},
+	}, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Downing the containers of the project: " + prjname)
+	err = myproject.Down(context.Background(), options.Down{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func (c *DockerCli) DeployStack(prjname string) []string {
+	myproject, err := docker.NewProject(&ctx.Context{
+		Context: project.Context{
+			ComposeFiles: []string{"docker-compose.yml"},
+			ProjectName:  prjname,
+		},
+	}, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Building the images")
+	err = myproject.Build(context.Background(), options.Build{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Upping the images")
 	err = myproject.Up(context.Background(), options.Up{})
 
 	if err != nil {

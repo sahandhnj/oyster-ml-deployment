@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/pearl"
 	"github.com/urfave/cli"
@@ -16,7 +17,7 @@ func main() {
 
 	app.Name = "Oysterbox"
 	app.Usage = "We deploy everyting"
-	app.Version = "0.0.1"
+	app.Version = "0.0.0.2"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -31,7 +32,23 @@ func main() {
 			Aliases: []string{"a"},
 			Usage:   "start a project",
 			Action: func(c *cli.Context) error {
-				pearl := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
+				name := uuid.New().String()
+				model := "model"
+				description := ""
+
+				if len(c.String("name")) > 0 {
+					name = c.String("name")
+				}
+
+				if len(c.String("modelPath")) > 0 {
+					model = c.String("modelPath")
+				}
+
+				if len(c.String("description")) > 0 {
+					description = c.String("description")
+				}
+
+				pearl, _ := pearl.NewPearl(name, description, model)
 				pearl.PrintInfo()
 				pearl.Config()
 
@@ -57,6 +74,8 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "show config",
 			Action: func(c *cli.Context) error {
+				pearl, _ := pearl.ReadPearl()
+				pearl.PrintInfo()
 
 				return nil
 			},
@@ -66,17 +85,17 @@ func main() {
 			Aliases: []string{"d"},
 			Usage:   "deploy the model",
 			Action: func(c *cli.Context) error {
-				pearl := pearl.NewPearl("prj1", "some AI model", "model.hdf5")
-				pearl.PrintInfo()
-				pearl.Config()
+				p, _ := pearl.ReadPearl()
+				p.PrintInfo()
 
 				fmt.Println("Deploying docker image")
 
 				dc := docker.NewDockerCli()
-				names := dc.DeployStack()
+				names := dc.DeployStack(p.Name)
 
 				for _, id := range names {
 					fmt.Println("Reading logs of: ", id)
+					pearl.NewNode(p.ID, id, pearl.Running)
 					go dc.ShowLogs(id)
 				}
 
@@ -91,9 +110,24 @@ func main() {
 			Usage:   "list APIs",
 			Action: func(c *cli.Context) error {
 				fmt.Println("List of docker containers")
+				pearl, _ := pearl.ReadPearl()
 
 				dc := docker.NewDockerCli()
-				dc.ListContainers()
+				dc.ListStackContainers(pearl.Name)
+
+				return nil
+			},
+		},
+		{
+			Name:    "drop",
+			Aliases: []string{"l"},
+			Usage:   "drop all container APIs",
+			Action: func(c *cli.Context) error {
+				fmt.Println("Dropping docker containers")
+				pearl, _ := pearl.ReadPearl()
+
+				dc := docker.NewDockerCli()
+				dc.Drop(pearl.Name)
 
 				return nil
 			},

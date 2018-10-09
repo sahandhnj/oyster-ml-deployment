@@ -3,3 +3,8 @@ docker-compose.yml
 
 ### Redis ###
 dump.rdb
+dog.jpg
+config.yaml
+apiclient
+.oyster
+.vscode
