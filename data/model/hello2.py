@@ -27,14 +27,14 @@ except (ImportError):
 
 from io import BytesIO
 
-numpy.random.seed(42)
+# numpy.random.seed(42)
 app = Flask(__name__)
 
 # Flask variables
 # ALLOWED_EXTENSIONS = set(['txt', 'png', 'jpg', 'jpeg', 'wav'])
 
 # Redis variables
-rdb = redis.StrictRedis(host='redis', port=6379, db=0)
+rdb = redis.StrictRedis(host='localhost', port=6379, db=0)  # Host = redis
 DATA_QUEUE = "data_queue"
 BATCH_SIZE = 32
 SERVER_SLEEP = 0.25
@@ -64,7 +64,8 @@ def base64_decoding(array, dtype, shape):
     array = array.reshape(shape)
     return array
 
-IMPUT_SIZE = (1, 500)
+def get_dtype(array):
+    return str(array.dtype)
 
 def classify_process():
     model = load_model('model.json', 'model_weights.h5')
@@ -73,12 +74,11 @@ def classify_process():
         queue = rdb.lrange(DATA_QUEUE, 0, BATCH_SIZE -1)
         dataIDs = []
         batch = None
-        
+
         for q in queue:
             q = q.decode("utf-8").replace("\'", "\"")
-            q = json.loads(q)
-            # print(r["data"])
-            data = base64_decoding(q["data"], 'float32', (1,500))
+            q = json.loads(q)   ###
+            data = base64_decoding(q["data"], q["dtype"], q["shape"]) ###
             if batch is None:
                 batch = data
             else:
@@ -87,18 +87,20 @@ def classify_process():
             # Check if it fits in batch and processing is needed
             if len(dataIDs) > 0:
                 print("Batch size: {}".format(batch.shape))
+                
                 with graph.as_default():
                     predictions = model.predict(batch)               
-            
-                for (dataID, prediction) in zip(dataIDs, predictions):            
-                    output = []
-                    r = {"id": dataID, "result": float(prediction)} # modify prediction as non-array so it can be stored to redis db
-                    output.append(r)
-                    # print(output)
 
-                rdb.set(dataID, json.dumps(output))
-            rdb.ltrim(DATA_QUEUE, len(dataIDs), -1)
-        time.sleep(SERVER_SLEEP)
+                for (dataID, predictionSet) in zip(dataIDs, predictions):            
+                    output = []
+                    for prediction in predictionSet:
+                        r = {"result": float(prediction)} # modify prediction as non-array so it can be stored to redis db
+                        output.append(r)
+                    output.append({"uid": dataID, "dtype": q["dtype"], "shape": q["shape"]})
+
+                    rdb.set(dataID, json.dumps(output))
+                rdb.ltrim(DATA_QUEUE, len(dataIDs), -1)
+            time.sleep(SERVER_SLEEP)
 
 
 @app.route('/predict', methods=["POST"])
@@ -109,16 +111,17 @@ def predict():
     if request.method == "POST":
         user_input = request.json["text"]      
         preprocessed_input = preprocessing(user_input)
+        array_dtype = get_dtype(preprocessed_input)            
         encoded_input = base64_encoding(preprocessed_input)
         # MAKE C-CONTIGOUS?????
+        # endoced_input = encoded_input.copy(order="C")   ###
         
         k = str(uuid.uuid4())
-        d = {"id": k, "shape": preprocessed_input.shape, "data": encoded_input}
+        d = {"id": k, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
         rdb.rpush(DATA_QUEUE, json.dumps(d))    # dump the preprocessed input as a numpy array
 
         while True:
             output = rdb.get(k)
-            # print(output)
 
             if output is not None:
                 output = output.decode("utf-8")

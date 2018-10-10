@@ -9,7 +9,7 @@ import numpy
 from keras.preprocessing import sequence
 import keras
 
-numpy.random.seed(42)
+# numpy.random.seed(42)
 
 max_review_length = 500
 top_words = 5000
