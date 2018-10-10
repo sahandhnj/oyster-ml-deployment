@@ -96,7 +96,7 @@ def classify_process():
                     for prediction in predictionSet:
                         r = {"result": float(prediction)} # modify prediction as non-array so it can be stored to redis db
                         output.append(r)
-                    output.append({"uid": dataID, "dtype": q["dtype"], "shape": q["shape"]})
+                    output.append({"input": {"uid": dataID, "dtype": q["dtype"], "shape": batch.shape}})
 
                     rdb.set(dataID, json.dumps(output))
                 rdb.ltrim(DATA_QUEUE, len(dataIDs), -1)
