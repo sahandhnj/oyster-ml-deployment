@@ -152,7 +152,7 @@ services:
     ports:
     - '5000:5000'
     volumes:
-        - './data/model:/src'
+        - './mlpipe:/src'
     command: python hello.py
 `
 
@@ -164,10 +164,10 @@ services:
     ports:
     - '5000:5000'
     volumes:
-        - './data/model:/src'
+        - './mlpipe:/src'
     links:
       - redis
-    command: python hello2.py
+    command: bash run.sh
   redis:
     image: redis:alpine
     volumes:

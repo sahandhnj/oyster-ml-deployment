@@ -8,7 +8,7 @@ import (
 
 type Node struct {
 	ID          string `json:"id"`
-	Name        string `json:"name"`
+	ImageName   string `json:"image_name"`
 	PearlId     string `json:"pearl_id"`
 	ContainerId string `json:"container_id"`
 	State       State  `json:"state"`
@@ -22,7 +22,7 @@ const (
 	Stopped  = State("stopped")
 )
 
-func NewNode(pearlId string, name string, containerId string, state State) (error, *Node) {
+func NewNode(name string, pearlId string, containerId string, state State) (error, *Node) {
 	n := Node{uuid.New().String(), name, pearlId, containerId, state}
 
 	json, err := json.Marshal(n)

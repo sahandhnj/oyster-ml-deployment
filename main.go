@@ -35,7 +35,7 @@ func main() {
 			Usage:   "start a project",
 			Action: func(c *cli.Context) error {
 				name := uuid.New().String()
-				model := "model"
+				model := "mlpipeline"
 				description := ""
 
 				if len(c.String("name")) > 0 {
@@ -108,10 +108,9 @@ func main() {
 				names := dc.DeployStack(p.Name)
 				nodes := make([]*pearl.Node, 0)
 				for _, id := range names {
-					fmt.Println("Reading logs of: ", id)
-					dc.InspectContainer(id)
+					fmt.Println("Reading logs of: ", dc.GetContainerImageName(id))
 
-					_, node := pearl.NewNode(p.ID, id, "noname", pearl.Running)
+					_, node := pearl.NewNode(dc.GetContainerImageName(id), p.ID, id, pearl.Running)
 					nodes = append(nodes, node)
 					go dc.ShowLogs(id)
 				}

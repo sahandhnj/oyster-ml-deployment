@@ -4,6 +4,8 @@ import yaml
 import redis
 import numpy as np
 import tensorflow as tf
+
+
 from config.clistyle import bcolor
 from keras.models import model_from_json
 from helpers import base64_decoding

@@ -29,5 +29,16 @@ func (c *DockerCli) InspectContainer(id string) {
 		panic(err)
 	}
 
-	fmt.Println(json)
+	fmt.Println(json.Config)
+}
+
+func (c *DockerCli) GetContainerImageName(id string) string {
+	ctx := context.Background()
+
+	json, err := c.cli.ContainerInspect(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+
+	return json.Config.Image
 }
