@@ -1,11 +1,19 @@
 Dockerfile
 docker-compose.yml
 
-### Redis ###
-dump.rdb
-dog.jpg
+
 config.yaml
 apiclient
 .oyster
-.vscode
 oyster.yml
+
+
+### Redis ###
+dump.rdb
+
+### Editors and User Specific ###
+.vscode
+.idea
+
+### Misc. ###
+dog.jpg
