@@ -16,14 +16,14 @@ type Pearl struct {
 	Description string    `json:"description" yaml:"description"`
 	ModelPath   string    `json:"model_path" yaml:"model_path"`
 	CreatedAt   time.Time `json:"created_at" yaml:"created_at"`
+	Nodes       []*Node   `json:"nodes"`
 }
 
 func NewPearl(name string, desc string, modelPath string) (*Pearl, error) {
-	p := Pearl{uuid.New().String(), name, desc, modelPath, time.Now()}
+	p := Pearl{uuid.New().String(), name, desc, modelPath, time.Now(), nil}
 
 	yamlBytes, err := yaml.Marshal(p)
 	yamlString := string(yamlBytes[:])
-
 	writeToFiles(yamlString, "oyster.yml")
 
 	if err != nil {
@@ -45,6 +45,14 @@ func ReadPearl() (*Pearl, error) {
 	}
 
 	return &pearl, nil
+}
+
+func (p *Pearl) UpdateConfig() error {
+	yamlBytes, err := yaml.Marshal(p)
+	yamlString := string(yamlBytes[:])
+	writeToFiles(yamlString, "oyster.yml")
+
+	return err
 }
 
 func (p *Pearl) Parse(data []byte) error {

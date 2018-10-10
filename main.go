@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/google/uuid"
+	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/pearl"
 	"github.com/urfave/cli"
@@ -18,6 +19,7 @@ func main() {
 	app.Name = "Oysterbox"
 	app.Usage = "We deploy everyting"
 	app.Version = "0.0.0.2"
+	db.Connect()
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -49,6 +51,8 @@ func main() {
 				}
 
 				pearl, _ := pearl.NewPearl(name, description, model)
+				db.Insert(pearl)
+
 				pearl.PrintInfo()
 				pearl.Config()
 
@@ -74,9 +78,19 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "show config",
 			Action: func(c *cli.Context) error {
-				pearl, _ := pearl.ReadPearl()
-				pearl.PrintInfo()
+				p, _ := pearl.ReadPearl()
+				p.PrintInfo()
 
+				return nil
+			},
+		},
+		{
+			Name:    "test",
+			Aliases: []string{"t"},
+			Usage:   "test",
+			Action: func(c *cli.Context) error {
+				dc := docker.NewDockerCli()
+				dc.InspectContainer("ce7134284c1ebe05605e1f26b5d05cdb7a3d66d57c4bf61c185dadf2fc7cac47")
 				return nil
 			},
 		},
@@ -92,12 +106,18 @@ func main() {
 
 				dc := docker.NewDockerCli()
 				names := dc.DeployStack(p.Name)
-
+				nodes := make([]*pearl.Node, 0)
 				for _, id := range names {
 					fmt.Println("Reading logs of: ", id)
-					pearl.NewNode(p.ID, id, pearl.Running)
+					dc.InspectContainer(id)
+
+					_, node := pearl.NewNode(p.ID, id, "noname", pearl.Running)
+					nodes = append(nodes, node)
 					go dc.ShowLogs(id)
 				}
+
+				p.Nodes = nodes
+				p.UpdateConfig()
 
 				fmt.Print("Press 'Enter' to continue...")
 				bufio.NewReader(os.Stdin).ReadBytes('\n')
