@@ -47,7 +47,7 @@ def classify_process():
             settings['data_stream']['data_queue'], 0, settings['data_stream']['batch_size'] - 1)
         dataIDs = []
         batch = None
-
+        
         for q in queue:
             q = q.decode("utf-8").replace("\'", "\"")
             q = json.loads(q)  ###

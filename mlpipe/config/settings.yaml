@@ -3,7 +3,7 @@ webservice:
   port: '5000'
   debug: True
 redis:
-  host: 'localhost'
+  host: 'redis'
   port: 6379
   db: 0
 data_stream:
