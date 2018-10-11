@@ -31,7 +31,7 @@ func (c *DockerCli) PrintAllCointainers() {
 	fmt.Println("Container Names | Image | Mounts")
 
 	for _, container := range containers {
-		fmt.Printf("%s | %s | %s\n", container.Names, container.Image, container.Mounts)
+		fmt.Printf("%s | %s | %v\n", container.Names, container.Image, container.Mounts)
 	}
 }
 
