@@ -2,6 +2,7 @@ package filemanager
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -34,6 +35,10 @@ func NewFileStoreManager() (*FileStoreManager, error) {
 	}
 
 	return FileStoreManager, nil
+}
+
+func (d *FileStoreManager) ConfigFileExists() (bool, error) {
+	return d.FileExists(d.ConfigFile)
 }
 
 func (d *FileStoreManager) ReadConfigFile() ([]byte, error) {
@@ -69,7 +74,6 @@ func (d *FileStoreManager) StoreStackFileFromBytes(stackIdentifier, fileName str
 }
 
 func (d *FileStoreManager) GetFileContent(filePath string) ([]byte, error) {
-	filePath = path.Join(d.DIR, filePath)
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -101,12 +105,17 @@ func (d *FileStoreManager) WriteYAMLToFile(filePath string, content interface{})
 }
 
 func (d *FileStoreManager) FileExists(filePath string) (bool, error) {
-	if _, err := os.Stat(filePath); err != nil {
+	_, err := os.Stat(".oyster/config.yaml")
+
+	if err != nil {
+		fmt.Println(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}
+
 		return false, err
 	}
+
 	return true, nil
 }
 

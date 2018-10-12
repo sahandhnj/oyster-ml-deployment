@@ -23,6 +23,14 @@ func NewModel(name string, desc string, modelPath string) (*Model, error) {
 		return nil, err
 	}
 
+	configExists, err := file.ConfigFileExists()
+	if err != nil {
+		return nil, err
+	}
+	if configExists {
+		return ReadModel()
+	}
+
 	model := Model{
 		Config: &types.ModelConfig{
 			ID:          uuid.New().String(),
@@ -54,7 +62,10 @@ func ReadModel() (*Model, error) {
 	}
 
 	var config types.ModelConfig
-	err = util.UnmarshalYamlObject(data, config)
+	err = util.UnmarshalYamlObject(data, &config)
+	if err != nil {
+		return nil, err
+	}
 
 	model := Model{
 		Config: &config,
