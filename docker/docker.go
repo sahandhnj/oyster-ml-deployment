@@ -219,7 +219,7 @@ func (c *DockerCli) CreateContainer() {
 			{
 				Type:   mount.TypeBind,
 				Source: path.Join(dir, "workspace"),
-				Target: "/src",
+				Target: "",
 			},
 		},
 	}, nil, "")

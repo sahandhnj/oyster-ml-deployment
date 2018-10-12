@@ -1,1 +1,0 @@
-curl --header "Content-Type: application/json" --request POST --data '{"text": "they really the movie and had fun"}' http://localhost:5000/predict
