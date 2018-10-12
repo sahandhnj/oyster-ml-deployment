@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/context"
 )
@@ -41,4 +42,18 @@ func (c *DockerCli) GetContainerImageName(id string) string {
 	}
 
 	return json.Config.Image
+}
+
+func (c *DockerCli) GetContainerConfig(id string) {
+	ctx := context.Background()
+
+	json, err := c.cli.ContainerInspect(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+
+	// fmt.Printf("%+v\n", json.Config)
+	// fmt.Printf("%+v\n", json.NetworkSettings)
+	spew.Dump(json.Config, json.NetworkSettings)
+
 }

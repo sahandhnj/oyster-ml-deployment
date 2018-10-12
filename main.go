@@ -90,7 +90,7 @@ func main() {
 			Usage:   "test",
 			Action: func(c *cli.Context) error {
 				dc := docker.NewDockerCli()
-				dc.InspectContainer("ce7134284c1ebe05605e1f26b5d05cdb7a3d66d57c4bf61c185dadf2fc7cac47")
+				dc.GetContainerConfig("3667bb131b30")
 				return nil
 			},
 		},
