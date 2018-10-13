@@ -19,3 +19,5 @@ dump.rdb
 dog.jpg
 *.pys
 **/*.pys
+debug/model
+debug/.oyster

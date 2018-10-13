@@ -8,6 +8,7 @@ import (
 
 	"github.com/sahandhnj/apiclient/types/model"
 	"github.com/sahandhnj/apiclient/types/node"
+	"github.com/sahandhnj/apiclient/types/version"
 
 	"github.com/sahandhnj/apiclient/docker"
 	"github.com/urfave/cli"
@@ -58,6 +59,30 @@ func main() {
 				cli.StringFlag{
 					Name:  "description",
 					Value: "This is a test model",
+				},
+			},
+		},
+		{
+			Name:    "commit",
+			Aliases: []string{"co"},
+			Usage:   "commit a version",
+			Action: func(c *cli.Context) error {
+				// ver := c.String("version")
+
+				model, err := model.ReadModel()
+				if err != nil {
+					fmt.Print(err)
+				}
+
+				_, err = version.NewVersion(model)
+				if err != nil {
+					fmt.Print(err)
+				}
+				return nil
+			},
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "version",
 				},
 			},
 		},

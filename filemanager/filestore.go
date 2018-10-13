@@ -119,7 +119,7 @@ func (d *FileStoreManager) FileExists(filePath string) (bool, error) {
 	return true, nil
 }
 
-func (d *FileStoreManager) createDirectoryInStore(name string) error {
+func (d *FileStoreManager) CreateDirectoryInStore(name string) error {
 	filePath := path.Join(d.DIR, name)
 	return os.MkdirAll(filePath, 0700)
 }

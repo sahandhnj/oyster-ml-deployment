@@ -13,7 +13,6 @@ func makeDockerFile() {
 	writeToFiles(docker_file_static, "Dockerfile")
 	writeToFiles(docker_compose_static_redis, "docker-compose.yml")
 	writeToFiles("", ".dockerignore")
-
 }
 
 func writeToFiles(content string, filename string) {
