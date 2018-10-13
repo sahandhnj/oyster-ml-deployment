@@ -5,7 +5,8 @@ import inspect
 import yaml
 import redis
 from config.clistyle import bcolor
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, flash
+from werkzeug.utils import secure_filename
 from helpers import base64_encoding, get_dtype
 
 try:
@@ -33,10 +34,11 @@ rdb = redis.StrictRedis(
     db=settings['redis']['db']
 )
 
-# Flask variables
-# ALLOWED_EXTENSIONS = set(['txt', 'png', 'jpg', 'jpeg', 'wav'])
-
 # rdb.flushall()
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in set(settings['data_stream']['allowed_extensions'])
 
 
 @app.route('/predict', methods=["POST"])
@@ -45,33 +47,69 @@ def predict():
     data = {"success": False}
 
     if request.method == "POST":
-        user_input = request.json["text"]      
-        preprocessed_input = preprocessing(user_input)
-        array_dtype = get_dtype(preprocessed_input)            
-        encoded_input = base64_encoding(preprocessed_input)
+        # Check if file is inputted
+        # print(request.files)
+
+        if 'data' not in request.files:
+            flash("No file part")
+            raise ValueError("No file part.")
+        file = request.files['data']
+        # Check if file name is not empty
+        if file.filename == '':
+            flash("No selected file")
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            print(filename)
+        if request.files.get('data'):
+            user_input = request.files["data"].read()
+            preprocessed_input = preprocessing(user_input)
+            array_dtype = get_dtype(preprocessed_input)
+            encoded_input = base64_encoding(preprocessed_input)
+        # user_input = request.json["text"]
+        # preprocessed_input = preprocessing(user_input)
+        # array_dtype = get_dtype(preprocessed_input)
+        # encoded_input = base64_encoding(preprocessed_input)
         # endoced_input = encoded_input.copy(order="C")   # make C-contigious?
-        
-        k = str(uuid.uuid4())
-        d = {"id": k, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
-        rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))    # dump the preprocessed input as a numpy array
 
-        while True:
-            output = rdb.get(k)
+            k = str(uuid.uuid4())
+            d = {"id": k, "filename": filename, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
+            rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))  # dump the preprocessed input as a numpy array
 
-            if output is not None:
-                output = output.decode("utf-8")
-                data["predictions"] = json.loads(output)
+            while True:
+                output = rdb.get(k)
 
-                rdb.delete(k)
-                break
-            
-            time.sleep(settings['data_stream']['client_sleep'])
-        data["success"] = True
+                if output is not None:
+                    output = output.decode("utf-8")
+                    # print("SUMMARY: ", json.loads(output)[0])
+                    data["summary"] = json.loads(output)
+
+                    rdb.delete(k)
+                    break
+
+                time.sleep(settings['data_stream']['client_sleep'])
+            data["success"] = True
+
+        # k = str(uuid.uuid4())
+        # d = {"id": k, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
+        # rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))    # dump the preprocessed input as a numpy array
+        #
+        # while True:
+        #     output = rdb.get(k)
+        #
+        #     if output is not None:
+        #         output = output.decode("utf-8")
+        #         data["predictions"] = json.loads(output)
+        #
+        #         rdb.delete(k)
+        #         break
+        #
+        #     time.sleep(settings['data_stream']['client_sleep'])
+        # data["success"] = True
     
     return jsonify(data)    
 
 
-@app.route("/")
+@app.route("/predict")
 def hello():
     return "Hello, Welcome to Oysterbox Machine Learning Deployment!"
 
@@ -86,8 +124,11 @@ if __name__ == "__main__":
     # t.start()
     
     print("* Starting web service...")
+    app.secret_key = 'super_secret_key'
+    # app.config['SESSION_TYPE'] = 'filesystem'
+
     app.run(
-        host=settings['webservice']['host'],
-        port=int(settings['webservice']['port']),
-        debug=settings['webservice']['debug']
+        host=settings['flask']['host'],
+        port=int(settings['flask']['port']),
+        debug=settings['flask']['debug']
     )

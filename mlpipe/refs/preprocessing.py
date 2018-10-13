@@ -8,6 +8,7 @@ Requirement:
 import numpy
 from keras.preprocessing import sequence
 import keras
+import csv
 
 # numpy.random.seed(42)
 
@@ -24,9 +25,24 @@ word_to_id["<UNK>"] = 2
 
 id_to_word = {value: key for key, value in word_to_id.items()}
 
+
 def preprocessing(data):
+    reader = csv.reader(data)
     tmp = []
     for word in data.split(" "):
         tmp.append(word_to_id[word])
     tmp_padded = sequence.pad_sequences([tmp], maxlen=max_review_length)
+
+    # for row in reader:
+    #     print(row)
+    # for i, line in enumerate(reader):
+    #     sentence = line[0].decode('utf-8').strip('\n').strip('\t')
+    #     print("SENTENCE: ", sentence, type(sentence))
+
+
+    #     for word in sentence: # .split(" "):
+    #         print("WORD:", word)
+    #         tmp.append(word_to_id[word])
+    #     tmp_padded = sequence.pad_sequences([tmp], maxlen=max_review_length)
+
     return tmp_padded

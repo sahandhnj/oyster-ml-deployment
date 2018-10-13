@@ -1,9 +1,9 @@
-webservice:
-  host: '0.0.0.0'
-  port: '5000'
+flask:
+  host: 0.0.0.0
+  port: 5000
   debug: True
 redis:
-  host: 'redis'
+  host: 'localhost'
   port: 6379
   db: 0
 data_stream:
@@ -11,7 +11,16 @@ data_stream:
   batch_size: 32
   server_sleep: 0.25
   client_sleep: 0.25
+  allowed_extensions:
+    - 'txt'
+    - 'csv'
+    - 'tsv'
+    - 'png'
+    - 'jpg'
+    - 'jpeg'
+    - 'json'
 model:
   pathdir: "./model/"
+  api_endpoint: "http://localhost:5000/predict"
 
 
