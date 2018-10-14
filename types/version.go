@@ -9,6 +9,7 @@ type Version struct {
 	Name          string `json:"name"`
 	VersionNumber int    `json:"version_number"`
 	ModelID       int    `json:"project_id"`
+	Deployed      bool   `json:"deployed"`
 }
 
 const (
@@ -22,6 +23,7 @@ func NewVersion(versionNumber int, modelId int) (*Version, error) {
 		Name:          util.MinUUID(uuid),
 		VersionNumber: versionNumber,
 		ModelID:       modelId,
+		Deployed:      false,
 	}
 
 	return &v, nil

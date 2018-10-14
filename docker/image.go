@@ -13,9 +13,8 @@ const (
 	DockerFileDefaultName = "Dockerfile"
 )
 
-func (c *DockerCli) BuildImage(tag []string) (io.Reader, error) {
+func (c *DockerCli) BuildImage(dockerFile string, tag []string) (io.Reader, error) {
 	ctx := context.Background()
-	dockerFile := DockerFileDefaultName
 
 	fm, err := filemanager.NewFileStoreManager()
 	if err != nil {

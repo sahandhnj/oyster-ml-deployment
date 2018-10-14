@@ -1,7 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"path"
+	"strconv"
+
+	"github.com/sahandhnj/apiclient/docker"
 
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/filemanager"
@@ -67,6 +71,34 @@ func (vs *VersionService) NewVersion() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (vs *VersionService) PrintVersions() error {
+	versions, err := vs.DBHandler.VersionService.VersionsByModelId(vs.Model.ID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\t%s\t%s\n", "Name", "Version number", "Deployed")
+	for _, ver := range versions {
+		fmt.Printf("%s\t%d\t%t\n", ver.Name, ver.VersionNumber, ver.Deployed)
+	}
+
+	return nil
+}
+
+func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli) error {
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber)
+	if err != nil {
+		return err
+	}
+
+	dockerFilePath := path.Join(vs.file.GetStorePath(version.Name), DockerFileName)
+	mainTag := vs.Model.Name + ":" + strconv.Itoa(version.VersionNumber)
+	tags := []string{mainTag}
+	dcli.BuildImage(dockerFilePath, tags)
 
 	return nil
 }

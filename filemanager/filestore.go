@@ -36,6 +36,10 @@ func NewFileStoreManager() (*FileStoreManager, error) {
 	return FileStoreManager, nil
 }
 
+func (d *FileStoreManager) GetStorePath(filePath string) string {
+	return path.Join(d.DIR, filePath)
+}
+
 func (d *FileStoreManager) ConfigFileExists() (bool, error) {
 	return d.FileExists(d.ConfigFile)
 }

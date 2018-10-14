@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"os"
 	"os/user"
 	"path"
@@ -55,7 +54,6 @@ func NewDBStore() (*DBStore, error) {
 }
 
 func (d *DBStore) Open() error {
-	fmt.Println(d.path)
 	db, err := bolt.Open(d.path, 0600, &bolt.Options{Timeout: TIMEOUT_SECONDS * time.Second})
 	if err != nil {
 		return err

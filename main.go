@@ -72,34 +72,80 @@ func main() {
 			},
 		},
 		{
-			Name:    "commit",
-			Aliases: []string{"co"},
-			Usage:   "commit a version",
-			Action: func(c *cli.Context) error {
-				modelservice, err := service.NewModelService(nil, dbhandler)
-				if err != nil {
-					log.Fatal(err)
-				}
+			Name:    "version",
+			Aliases: []string{"v"},
+			Usage:   "version control",
+			Subcommands: []cli.Command{
+				{
+					Name:  "commit",
+					Usage: "commit a new version",
+					Action: func(c *cli.Context) error {
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
 
-				versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
-				if err != nil {
-					log.Fatal(err)
-				}
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
 
-				err = versionService.NewVersion()
-				if err != nil {
-					log.Fatal(err)
-				}
+						err = versionService.NewVersion()
+						if err != nil {
+							log.Fatal(err)
+						}
 
-				fmt.Printf("Version %d has been commited into %s", versionService.Version.VersionNumber, versionService.Version.Name)
-				if err != nil {
-					log.Fatal(err)
-				}
-				return nil
-			},
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "version",
+						fmt.Printf("Version %d has been commited into %s", versionService.Version.VersionNumber, versionService.Version.Name)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+				},
+				{
+					Name:  "list",
+					Usage: "list versions",
+					Action: func(c *cli.Context) error {
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.PrintVersions()
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+				},
+				{
+					Name:  "deploy",
+					Usage: "deploy version",
+					Action: func(c *cli.Context) error {
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.PrintVersions()
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
 				},
 			},
 		},
