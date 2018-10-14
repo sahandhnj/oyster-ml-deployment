@@ -29,7 +29,7 @@ func (s *Service) Model(ID int) (*types.Model, error) {
 	var model types.Model
 	identifier := util.Itob(int(ID))
 
-	err := util.GetObject(Service.db, BucketName, identifier, &model)
+	err := util.GetObject(s.db, BucketName, identifier, &model)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *Service) ModelByName(name string) (*types.Model, error) {
 		}
 
 		if model == nil {
-			return util.GetError(ErrNotFound)
+			return util.GetError(util.ErrNotFound)
 		}
 
 		return nil
@@ -70,7 +70,7 @@ func (s *Service) ModelByName(name string) (*types.Model, error) {
 func (s *Service) Models() ([]types.Model, error) {
 	var models = make([]types.Model, 0)
 
-	err := Service.db.View(func(tx *bolt.Tx) error {
+	err := s.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(BucketName))
 
 		cursor := bucket.Cursor()
@@ -111,12 +111,12 @@ func (s *Service) CreateModel(model *types.Model) error {
 	})
 }
 
-func (s *Service) UpdateModel(ID types.ModelID, model *types.Model) error {
+func (s *Service) UpdateModel(ID int, model *types.Model) error {
 	identifier := util.Itob(int(ID))
 	return util.UpdateObject(s.db, BucketName, identifier, model)
 }
 
-func (s *Service) DeleteModel(ID types.ModelID) error {
+func (s *Service) DeleteModel(ID int) error {
 	identifier := util.Itob(int(ID))
-	return util.DeleteObject(Service.db, BucketName, identifier)
+	return util.DeleteObject(s.db, BucketName, identifier)
 }

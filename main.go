@@ -1,21 +1,23 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/sahandhnj/apiclient/db"
+	"github.com/sahandhnj/apiclient/service"
 	"github.com/sahandhnj/apiclient/types/model"
-	"github.com/sahandhnj/apiclient/types/node"
-	"github.com/sahandhnj/apiclient/types/version"
 
-	"github.com/sahandhnj/apiclient/docker"
 	"github.com/urfave/cli"
 )
 
 func main() {
 	app := cli.NewApp()
+	dbhandler, err := db.NewDBStore()
+	if err != nil {
+		fmt.Print(err)
+	}
 
 	app.Name = "Oysterbox"
 	app.Usage = "We deploy everyting"
@@ -37,13 +39,13 @@ func main() {
 				name := c.String("name")
 				modelPath := c.String("modelPath")
 				description := c.String("description")
+				model := model.NewModel(0, name, description, modelPath)
 
-				model, err := model.NewModel(name, description, modelPath)
+				modelservice, err := service.NewModelService(model, dbhandler)
 				if err != nil {
 					fmt.Print(err)
 				}
-
-				model.PrintInfo()
+				modelservice.Model.PrintInfo()
 
 				return nil
 			},
@@ -68,16 +70,16 @@ func main() {
 			Usage:   "commit a version",
 			Action: func(c *cli.Context) error {
 				// ver := c.String("version")
+				// modelservice := service.NewModelService()
+				// modelservice, err := model.ReadModel()
+				// if err != nil {
+				// 	fmt.Print(err)
+				// }
 
-				model, err := model.ReadModel()
-				if err != nil {
-					fmt.Print(err)
-				}
-
-				_, err = version.NewVersion(model)
-				if err != nil {
-					fmt.Print(err)
-				}
+				// _, err = version.NewVersion(model)
+				// if err != nil {
+				// 	fmt.Print(err)
+				// }
 				return nil
 			},
 			Flags: []cli.Flag{
@@ -91,12 +93,12 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "show config",
 			Action: func(c *cli.Context) error {
-				model, err := model.ReadModel()
-				if err != nil {
-					fmt.Print(err)
-				}
+				// model, err := model.ReadModel()
+				// if err != nil {
+				// 	fmt.Print(err)
+				// }
 
-				model.PrintInfo()
+				// model.PrintInfo()
 
 				return nil
 			},
@@ -106,8 +108,14 @@ func main() {
 			Aliases: []string{"t"},
 			Usage:   "test",
 			Action: func(c *cli.Context) error {
-				dc := docker.NewDockerCli()
-				dc.GetContainerConfig("3667bb131b30")
+				// dbhandler := db.NewDBStore()
+				// model, err := model.NewModel("name", "description", "model")
+				// if err != nil {
+				// 	fmt.Print(err)
+				// }
+
+				// model.PrintInfo()
+
 				return nil
 			},
 		},
@@ -116,31 +124,31 @@ func main() {
 			Aliases: []string{"d"},
 			Usage:   "deploy the model",
 			Action: func(c *cli.Context) error {
-				model, err := model.ReadModel()
-				if err != nil {
-					fmt.Print(err)
-				}
+				// model, err := model.ReadModel()
+				// if err != nil {
+				// 	fmt.Print(err)
+				// }
 
-				model.PrintInfo()
+				// model.PrintInfo()
 
-				fmt.Println("Deploying docker image")
+				// fmt.Println("Deploying docker image")
 
-				dc := docker.NewDockerCli()
-				names := dc.DeployStack(model.Config.Name)
-				nodes := make([]*node.Node, 0)
+				// dc := docker.NewDockerCli()
+				// names := dc.DeployStack(model.Config.Name)
+				// nodes := make([]*node.Node, 0)
 
-				for _, id := range names {
-					fmt.Println("Reading logs of: ", dc.GetContainerImageName(id))
+				// for _, id := range names {
+				// 	fmt.Println("Reading logs of: ", dc.GetContainerImageName(id))
 
-					_, node := node.NewNode(dc.GetContainerImageName(id), model.Config.ID, id, node.Running)
-					nodes = append(nodes, node)
-					go dc.ShowLogs(id)
-				}
+				// 	_, node := node.NewNode(dc.GetContainerImageName(id), model.Config.ID, id, node.Running)
+				// 	nodes = append(nodes, node)
+				// 	go dc.ShowLogs(id)
+				// }
 
-				model.Nodes = nodes
+				// model.Nodes = nodes
 
-				fmt.Print("Press 'Enter' to continue...")
-				bufio.NewReader(os.Stdin).ReadBytes('\n')
+				// fmt.Print("Press 'Enter' to continue...")
+				// bufio.NewReader(os.Stdin).ReadBytes('\n')
 				return nil
 			},
 		},
@@ -170,7 +178,7 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}

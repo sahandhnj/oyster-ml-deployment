@@ -29,7 +29,7 @@ func (s *Service) Version(ID int) (*types.Version, error) {
 	var version types.Version
 	identifier := util.Itob(int(ID))
 
-	err := util.GetObject(Service.db, BucketName, identifier, &Version)
+	err := util.GetObject(s.db, BucketName, identifier, &version)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *Service) VersionByName(name string) (*types.Version, error) {
 		}
 
 		if version == nil {
-			return util.GetError(ErrNotFound)
+			return util.GetError(util.ErrNotFound)
 		}
 
 		return nil
@@ -70,7 +70,7 @@ func (s *Service) VersionByName(name string) (*types.Version, error) {
 func (s *Service) Versions() ([]types.Version, error) {
 	var versions = make([]types.Version, 0)
 
-	err := Service.db.View(func(tx *bolt.Tx) error {
+	err := s.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(BucketName))
 
 		cursor := bucket.Cursor()
@@ -111,12 +111,12 @@ func (s *Service) CreateVersion(version *types.Version) error {
 	})
 }
 
-func (s *Service) UpdateVersion(ID types.VersionID, version *types.Version) error {
+func (s *Service) UpdateVersion(ID int, version *types.Version) error {
 	identifier := util.Itob(int(ID))
 	return util.UpdateObject(s.db, BucketName, identifier, version)
 }
 
-func (s *Service) DeleteVersion(ID types.VersionID) error {
+func (s *Service) DeleteVersion(ID int) error {
 	identifier := util.Itob(int(ID))
-	return util.DeleteObject(Service.db, BucketName, identifier)
+	return util.DeleteObject(s.db, BucketName, identifier)
 }

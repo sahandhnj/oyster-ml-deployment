@@ -9,24 +9,24 @@ import (
 )
 
 type Version struct {
-	ID         string `json:"id"`
+	ID         int    `json:"id"`
 	Name       string `json:"name"`
 	DockerFile string `json:"dockerfile"`
-	ModelID    string `json:"project_id"`
+	ModelID    int    `json:"project_id"`
 }
 
 const (
 	RequirementsFilePath = "requirements.txt"
 )
 
-func NewVersion(model *model.Model) (*Version, error) {
-	ID := util.UUID()
+func NewVersion(ID int, model *model.Model) (*Version, error) {
+	uuid := util.UUID()
 
 	v := Version{
 		ID:         ID,
-		Name:       util.MinUUID(ID),
-		DockerFile: "Dockerfile-" + util.MinUUID(ID),
-		ModelID:    model.Config.ID,
+		Name:       util.MinUUID(uuid),
+		DockerFile: "Dockerfile-" + util.MinUUID(uuid),
+		ModelID:    model.ID,
 	}
 
 	v.Apply(model)
@@ -41,8 +41,8 @@ func (v *Version) Apply(model *model.Model) error {
 	}
 
 	fm.CreateDirectoryInStore(v.Name)
-	fm.CTarGz(path.Join(v.Name, "model.tar.gz"), []string{model.Config.ModelPath}, false)
-	fm.CopyToStore(path.Join(model.Config.ModelPath, "requirements.txt"), path.Join(v.Name, "requirements.txt"))
+	fm.CTarGz(path.Join(v.Name, "model.tar.gz"), []string{model.ModelPath}, false)
+	fm.CopyToStore(path.Join(model.ModelPath, "requirements.txt"), path.Join(v.Name, "requirements.txt"))
 	v.createDockerFile(fm)
 
 	return nil

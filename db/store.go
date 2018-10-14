@@ -1,43 +1,68 @@
 package db
 
 import (
+	"fmt"
+	"os"
+	"os/user"
 	"path"
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/sahandhnj/apiclient/store/model"
+	"github.com/sahandhnj/apiclient/db/model"
+	"github.com/sahandhnj/apiclient/db/version"
 )
 
 const (
 	databaseFileName = "oysterbox.db"
-	DBStorePath      = "~/.oysterdb"
+	DBStorePath      = ".oysterdb"
 	TIMEOUT_SECONDS  = 1
 )
 
 type DBStore struct {
-	path         string
-	db           *bolt.DB
-	ModelService model.Service
+	path           string
+	db             *bolt.DB
+	ModelService   *model.Service
+	VersionService *version.Service
 }
 
-func NewDBStore(DBStorePath string) (*DBStore, error) {
-	databasePath := path.Join(DBStorePath, databaseFileName)
+func NewDBStore() (*DBStore, error) {
+	usr, err := user.Current()
+	databaseDir := path.Join(usr.HomeDir, DBStorePath)
+	databasePath := path.Join(databaseDir, databaseFileName)
 
-	DBStore := &DBStore{
+	if _, err := os.Stat(databaseDir); os.IsNotExist(err) {
+		err = os.Mkdir(databaseDir, 0700)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	dbStore := &DBStore{
 		path: databasePath,
 	}
 
-	return DBStore, nil
+	err = dbStore.Open()
+	if err != nil {
+		return nil, err
+	}
+
+	err = dbStore.initServices()
+	if err != nil {
+		return nil, err
+	}
+
+	return dbStore, nil
 }
 
 func (d *DBStore) Open() error {
+	fmt.Println(d.path)
 	db, err := bolt.Open(d.path, 0600, &bolt.Options{Timeout: TIMEOUT_SECONDS * time.Second})
 	if err != nil {
 		return err
 	}
-	DBStore.db = db
+	d.db = db
 
-	return DBStore.initServices()
+	return d.initServices()
 }
 
 func (d *DBStore) Close() error {
@@ -54,7 +79,14 @@ func (d *DBStore) initServices() error {
 		return err
 	}
 
-	f.ModelService = modelDBService
+	d.ModelService = modelDBService
+
+	// versionDBService, err := version.NewService(d.db)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// d.VersionService = versionDBService
 
 	return nil
 }
