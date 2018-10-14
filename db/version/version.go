@@ -62,7 +62,7 @@ func (s *Service) VersionsByModelId(modelId int) ([]types.Version, error) {
 	return versions, err
 }
 
-func (s *Service) VersionByVersionNumber(versionNumber int) (*types.Version, error) {
+func (s *Service) VersionByVersionNumber(versionNumber int, modelId int) (*types.Version, error) {
 	var version *types.Version
 
 	err := s.db.View(func(tx *bolt.Tx) error {
@@ -76,7 +76,7 @@ func (s *Service) VersionByVersionNumber(versionNumber int) (*types.Version, err
 				return err
 			}
 
-			if t.VersionNumber == versionNumber {
+			if t.VersionNumber == versionNumber && t.ModelID == modelId {
 				version = &t
 				break
 			}

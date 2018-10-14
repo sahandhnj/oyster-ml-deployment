@@ -91,7 +91,7 @@ func (vs *VersionService) PrintVersions() error {
 }
 
 func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verbose bool) error {
-	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber)
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
 	if err != nil {
 		return err
 	}
