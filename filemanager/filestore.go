@@ -1,6 +1,7 @@
 package filemanager
 
 import (
+	"bufio"
 	"bytes"
 	"io/ioutil"
 	"path"
@@ -87,6 +88,37 @@ func (d *FileStoreManager) GetFileContent(filePath string) ([]byte, error) {
 
 func (d *FileStoreManager) Rename(oldPath, newPath string) error {
 	return os.Rename(oldPath, newPath)
+}
+
+func (d *FileStoreManager) WriteToFileWithReader(filePath string, reader io.Reader) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	_, err = io.Copy(file, reader)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *FileStoreManager) StreamFileToStdOut(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+
+	buf := bufio.NewReader(file)
+
+	_, err = io.Copy(os.Stdout, buf)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *FileStoreManager) WriteToFile(filePath string, content string) error {

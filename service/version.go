@@ -17,6 +17,7 @@ const (
 	ModelTarFile         = "model.tar.gz"
 	DockerFileName       = "DockerFile"
 	DockerIgnoreFileName = ".dockerignore"
+	BuildLogFile         = "buildlog"
 )
 
 type VersionService struct {
@@ -89,16 +90,38 @@ func (vs *VersionService) PrintVersions() error {
 	return nil
 }
 
-func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli) error {
+func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verbose bool) error {
 	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber)
 	if err != nil {
 		return err
 	}
 
 	dockerFilePath := path.Join(vs.file.GetStorePath(version.Name), DockerFileName)
-	mainTag := vs.Model.Name + ":" + strconv.Itoa(version.VersionNumber)
+	mainTag := "oyster/" + vs.Model.Name + ":" + strconv.Itoa(version.VersionNumber)
 	tags := []string{mainTag}
-	dcli.BuildImage(dockerFilePath, tags)
+
+	fmt.Println("Deploying: ")
+	fmt.Println(tags)
+
+	logs, err := dcli.BuildImage(dockerFilePath, tags)
+	if err != nil {
+		return err
+	}
+
+	logFilePath := path.Join(vs.file.GetStorePath(version.Name), BuildLogFile)
+
+	fmt.Println("Writing image build logs into: ", logFilePath)
+	err = vs.file.WriteToFileWithReader(logFilePath, logs)
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		err = vs.file.StreamFileToStdOut(logFilePath)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

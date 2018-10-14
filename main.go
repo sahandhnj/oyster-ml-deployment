@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/sahandhnj/apiclient/db"
+	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/service"
 	"github.com/sahandhnj/apiclient/types"
 
@@ -129,6 +131,11 @@ func main() {
 					Name:  "deploy",
 					Usage: "deploy version",
 					Action: func(c *cli.Context) error {
+						versionNumber := c.Args().Get(0)
+						if versionNumber == "" {
+							log.Fatal("You have to specify the version number")
+						}
+
 						modelservice, err := service.NewModelService(nil, dbhandler)
 						if err != nil {
 							log.Fatal(err)
@@ -139,12 +146,25 @@ func main() {
 							log.Fatal(err)
 						}
 
-						err = versionService.PrintVersions()
+						dc := docker.NewDockerCli()
+
+						vnum, err := strconv.Atoi(versionNumber)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.Deploy(vnum, dc, c.Bool("verbose"))
 						if err != nil {
 							log.Fatal(err)
 						}
 
 						return nil
+					},
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "verbose",
+							Value: "false",
+						},
 					},
 				},
 			},
