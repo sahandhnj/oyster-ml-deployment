@@ -45,8 +45,7 @@ for t in tweet_files:
     success = resp["success"]
     inputfile = resp['summary'][1]['input']['filename']
     filecontent = open(data_dir + t).read()
-    print("REVIEW: {0:<30s} \t SENTIMENT: {1:.3f} \t
-     (file={2}, analysis={3})".format(filecontent, prediction, inputfile, success))
+    print("REVIEW: {0:<30s} \t SENTIMENT: {1:.3f} \t (file={2}, analysis={3})".format(filecontent, prediction, inputfile, success))
    
     results.append(resp)
         

@@ -4,11 +4,12 @@ import yaml
 import redis
 import numpy as np
 import tensorflow as tf
+from keras.applications import imagenet_utils
 
 
 from config.clistyle import bcolor
 from keras.models import model_from_json
-from helpers import base64_decoding
+from helpers import base64_decoding, NumpyEncoder
 
 with open("./config/settings.yaml", 'r') as stream:
     try:
@@ -22,8 +23,10 @@ rdb = redis.StrictRedis(
     port=settings['redis']['port'],
     db=settings['redis']['db']
 )
-model_dir = settings['model']['pathdir']
 
+model_dir = settings['model']['pathdir']
+graph_file = settings['model']['graph_file']
+weights_file = settings['model']['weights_file']
 
 def load_model(model_file_path, weights_file_path):
     global model
@@ -34,13 +37,13 @@ def load_model(model_file_path, weights_file_path):
 
     global graph
     graph = tf.get_default_graph()
-    print(bcolor.BOLD + "Loaded model from disk and inserted weights." + bcolor.END)
+    print(bcolor.BOLD + "Loaded model '{}' from disk and inserted weights from '{}'.".format(graph_file, weights_file) + bcolor.END)
 
     return loaded_model
 
 
 def classify_process():
-    model = load_model(model_dir + 'model.json', model_dir + 'model_weights.h5')
+    model = load_model(model_dir + graph_file, model_dir + weights_file)
 
     while True:
         queue = rdb.lrange(
@@ -52,6 +55,9 @@ def classify_process():
             q = q.decode("utf-8").replace("\'", "\"")
             q = json.loads(q)  ###
             data = base64_decoding(q["data"], q["dtype"], q["shape"])  ###
+            print("QSHAPE: ", q['shape'], q["filetype"])
+            
+            
             if batch is None:
                 batch = data
             else:
@@ -63,18 +69,30 @@ def classify_process():
 
                 with graph.as_default():
                     predictions = model.predict(batch)
+                
+                image_exts = ['jpg', 'jpeg', 'png']
+                # for k, v in result_dict.items():
+                #     if k in image
+                if (q["filetype"] in ['jpg', 'jpeg', 'png']):
+                    predictions = imagenet_utils.decode_predictions(predictions)
+                else:
+                    pass
 
                 for (dataID, predictionSet) in zip(dataIDs, predictions):
                     output = []
                     for prediction in predictionSet:
-                        r = {"result": float(prediction)}  # modify prediction as non-array so it can be stored to redis db
+                        print("PREDICTION: ", prediction, type(predictions))
+                        r = {"result": prediction}  # float() modify prediction as non-array so it can be stored to redis db
                         output.append(r)
-                    output.append({"input": {"uid": dataID, "filename": q["filename"], "dtype": q["dtype"], "shape": batch.shape}})
+                    output.append({"input": {"uid": dataID, "filename": q["filename"], "filetype": q["filetype"], "dtype": q["dtype"], "shape": batch.shape}})
 
-                    rdb.set(dataID, json.dumps(output))
+                    rdb.set(dataID, json.dumps(output, cls=NumpyEncoder))
                 rdb.ltrim(settings['data_stream']['data_queue'], len(dataIDs), -1)
             time.sleep(settings['data_stream']['server_sleep'])
 
 
 if __name__ == "__main__":
     classify_process()
+
+# for item in [1,2,3, 'string', None]:
+#     print type(item)

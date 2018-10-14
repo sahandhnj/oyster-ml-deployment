@@ -8,12 +8,15 @@ from config.clistyle import bcolor
 from flask import Flask, request, jsonify, flash
 from werkzeug.utils import secure_filename
 from helpers import base64_encoding, get_dtype
+from PIL import Image
+import io
+import numpy as np
 
 try:
-    from model import preprocessing as prepmod
+    from runs.sentiment_analysis import preprocessing as prepmod
 
     if hasattr(prepmod, 'preprocessing') and inspect.isfunction(prepmod.preprocessing):
-        from model.preprocessing import preprocessing
+        from runs.sentiment_analysis.preprocessing import preprocessing
         print("Preprocessing file available and loaded into vessel.")
     else:
         raise TypeError("Preprocessing file inserted, but does not contain function called 'preprocessing'.")
@@ -25,6 +28,8 @@ with open("./config/settings.yaml", 'r') as stream:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:
         print(exc)
+
+
 
 # numpy.random.seed(42)
 app = Flask(__name__)
@@ -40,6 +45,8 @@ rdb = redis.StrictRedis(
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in set(settings['data_stream']['allowed_extensions'])
 
+def get_file_type(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower()
 
 @app.route('/predict', methods=["POST"])
 def predict():
@@ -54,6 +61,9 @@ def predict():
             flash("No file part")
             raise ValueError("No file part.")
         file = request.files['data']
+        print("FILENAME: ", file.filename)
+        filetype = get_file_type(file.filename)
+        print("FILETYPE: ", filetype)
         # Check if file name is not empty
         if file.filename == '':
             flash("No selected file")
@@ -62,8 +72,24 @@ def predict():
             print(filename)
         if request.files.get('data'):
             user_input = request.files["data"].read()
+            if (filetype in ['jpg', 'jpeg', 'png']): # == [ext for ext in ('jpg', 'jpeg', 'png')]
+                user_input = Image.open(io.BytesIO(user_input))
+            else:
+                pass
+
             preprocessed_input = preprocessing(user_input)
+            
+            # Get file properties
+            if filetype in ['jpg', 'jpeg', 'png']: # == [ext for ext in ('jpg', 'jpeg', 'png')]
+                fileshape = np.array(preprocessed_input).shape
+            else:
+                fileshape = preprocessed_input.shape
+
+            print("SHAPE: ", fileshape)
+             
             array_dtype = get_dtype(preprocessed_input)
+            print("DTYPE", array_dtype)
+            preprocessed_input = preprocessed_input.copy(order="C")
             encoded_input = base64_encoding(preprocessed_input)
         # user_input = request.json["text"]
         # preprocessed_input = preprocessing(user_input)
@@ -72,7 +98,7 @@ def predict():
         # endoced_input = encoded_input.copy(order="C")   # make C-contigious?
 
             k = str(uuid.uuid4())
-            d = {"id": k, "filename": filename, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
+            d = {"id": k, "filename": filename, "filetype": filetype, "shape": fileshape, "dtype": array_dtype, "data": encoded_input}
             rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))  # dump the preprocessed input as a numpy array
 
             while True:
