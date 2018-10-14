@@ -81,12 +81,12 @@ func (d *DBStore) initServices() error {
 
 	d.ModelService = modelDBService
 
-	// versionDBService, err := version.NewService(d.db)
-	// if err != nil {
-	// 	return err
-	// }
+	versionDBService, err := version.NewService(d.db)
+	if err != nil {
+		return err
+	}
 
-	// d.VersionService = versionDBService
+	d.VersionService = versionDBService
 
 	return nil
 }

@@ -9,14 +9,16 @@ type Model struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
 	ModelPath   string `json:"model_path" yaml:"model_path"`
+	DIR         string `json:"dir" yaml:"dir"`
 }
 
-func NewModel(ID int, name string, desc string, modelPath string) *Model {
+func NewModel(ID int, name string, desc string, modelPath string, dir string) *Model {
 	model := Model{
 		ID:          ID,
 		Name:        name,
 		Description: desc,
 		ModelPath:   modelPath,
+		DIR:         dir,
 	}
 
 	return &model

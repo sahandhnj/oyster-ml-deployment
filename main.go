@@ -16,7 +16,12 @@ func main() {
 	app := cli.NewApp()
 	dbhandler, err := db.NewDBStore()
 	if err != nil {
-		fmt.Print(err)
+		log.Fatal(err)
+	}
+
+	CurrentDir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	app.Name = "Oysterbox"
@@ -39,12 +44,13 @@ func main() {
 				name := c.String("name")
 				modelPath := c.String("modelPath")
 				description := c.String("description")
-				model := model.NewModel(0, name, description, modelPath)
+				model := model.NewModel(0, name, description, modelPath, CurrentDir)
 
 				modelservice, err := service.NewModelService(model, dbhandler)
 				if err != nil {
-					fmt.Print(err)
+					log.Fatal(err)
 				}
+
 				modelservice.Model.PrintInfo()
 
 				return nil
@@ -73,12 +79,12 @@ func main() {
 				// modelservice := service.NewModelService()
 				// modelservice, err := model.ReadModel()
 				// if err != nil {
-				// 	fmt.Print(err)
+				// 	log.Fatal(err)
 				// }
 
 				// _, err = version.NewVersion(model)
 				// if err != nil {
-				// 	fmt.Print(err)
+				// 	log.Fatal(err)
 				// }
 				return nil
 			},
@@ -95,7 +101,7 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// model, err := model.ReadModel()
 				// if err != nil {
-				// 	fmt.Print(err)
+				// 	log.Fatal(err)
 				// }
 
 				// model.PrintInfo()
@@ -111,7 +117,7 @@ func main() {
 				// dbhandler := db.NewDBStore()
 				// model, err := model.NewModel("name", "description", "model")
 				// if err != nil {
-				// 	fmt.Print(err)
+				// 	log.Fatal(err)
 				// }
 
 				// model.PrintInfo()
@@ -126,7 +132,7 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// model, err := model.ReadModel()
 				// if err != nil {
-				// 	fmt.Print(err)
+				// 	log.Fatal(err)
 				// }
 
 				// model.PrintInfo()

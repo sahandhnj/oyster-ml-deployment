@@ -116,7 +116,6 @@ func (d *FileStoreManager) FileExists(filePath string) (bool, error) {
 	_, err := os.Stat(".oyster/config.yaml")
 
 	if err != nil {
-		fmt.Println(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

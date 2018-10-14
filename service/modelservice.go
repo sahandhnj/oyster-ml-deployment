@@ -37,9 +37,13 @@ func NewModelService(model *model.Model, dbHandler *db.DBStore) (*ModelService, 
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		model.ID = dbHandler.ModelService.GetNextIdentifier()
+		dbHandler.ModelService.CreateModel(model)
 	}
+
 	modelService.Model = model
-	
+
 	err = modelService.file.WriteToConfigFile(model)
 
 	if err != nil {
