@@ -1,7 +1,6 @@
 package filemanager
 
 import (
-	"fmt"
 	"path"
 
 	"github.com/mholt/archiver"
@@ -16,7 +15,6 @@ func (f *FileStoreManager) CTarGz(output string, content []string, internal bool
 		}
 	}
 
-	fmt.Println(content)
 	return archiver.Zip.Make(output, content)
 }
 

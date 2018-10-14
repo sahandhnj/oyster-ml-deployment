@@ -86,6 +86,14 @@ func (d *FileStoreManager) Rename(oldPath, newPath string) error {
 	return os.Rename(oldPath, newPath)
 }
 
+func (d *FileStoreManager) WriteToFile(filePath string, content string) error {
+	filePath = path.Join(d.DIR, filePath)
+	byteContent := []byte(content)
+
+	fmt.Println(filePath)
+	return ioutil.WriteFile(filePath, byteContent, 0644)
+}
+
 func (d *FileStoreManager) WriteJSONToFile(filePath string, content interface{}) error {
 	jsonContent, err := util.MarshalJsonObject(content)
 	if err != nil {

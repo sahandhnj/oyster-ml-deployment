@@ -11,5 +11,10 @@ func UUID() string {
 }
 
 func MinUUID(uuid string) string {
-	return strings.TrimSuffix(uuid, "-")
+	parts := strings.SplitN(uuid, "-", 2)
+	if len(parts) > 0 {
+		return parts[0]
+	}
+
+	return ""
 }
