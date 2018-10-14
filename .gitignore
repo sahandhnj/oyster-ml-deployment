@@ -16,6 +16,8 @@ dump.rdb
 .idea
 
 ### Misc. ###
+data/
+runs/
 dog.jpg
 *.pys
 **/*.pys
