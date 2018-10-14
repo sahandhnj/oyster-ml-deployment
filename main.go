@@ -99,12 +99,12 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "show config",
 			Action: func(c *cli.Context) error {
-				// model, err := model.ReadModel()
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
+				modelservice, err := service.NewModelService(nil, dbhandler)
+				if err != nil {
+					log.Fatal(err)
+				}
 
-				// model.PrintInfo()
+				modelservice.Model.PrintInfo()
 
 				return nil
 			},

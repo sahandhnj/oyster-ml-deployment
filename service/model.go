@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/filemanager"
 	"github.com/sahandhnj/apiclient/types/model"
@@ -38,6 +40,10 @@ func NewModelService(model *model.Model, dbHandler *db.DBStore) (*ModelService, 
 			return nil, err
 		}
 	} else {
+		if model == nil {
+			return nil, errors.New("No oyster project found. use init command to start one")
+		}
+		
 		model.ID = dbHandler.ModelService.GetNextIdentifier()
 		dbHandler.ModelService.CreateModel(model)
 	}
