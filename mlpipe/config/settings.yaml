@@ -1,7 +1,9 @@
 flask:
   host: 0.0.0.0
   port: 5000
+  endpoint: '/predict'
   debug: True
+  secret_key: 'super_secret_key'
 redis:
   host: 'localhost'
   port: 6379
@@ -20,9 +22,10 @@ data_stream:
     - 'jpeg'
     - 'json'
 model:
-  pathdir: "./runs/sentiment_analysis/"
-  graph_file: "model.json"
-  weights_file: "model_weights.h5"
+  module: 'keras'
+  pathdir: "./runs/imagenet/model/"
+  graph_file: "resnet50_imagenet.json"
+  weights_file: "resnet50_imagenet_weights.h5"
   api_endpoint: "http://localhost:5000/predict"
 
 

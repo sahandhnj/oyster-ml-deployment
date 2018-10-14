@@ -13,10 +13,10 @@ import io
 import numpy as np
 
 try:
-    from runs.sentiment_analysis import preprocessing as prepmod
+    from runs.imagenet import preprocessing as prepmod
 
     if hasattr(prepmod, 'preprocessing') and inspect.isfunction(prepmod.preprocessing):
-        from runs.sentiment_analysis.preprocessing import preprocessing
+        from runs.imagenet.preprocessing import preprocessing
         print("Preprocessing file available and loaded into vessel.")
     else:
         raise TypeError("Preprocessing file inserted, but does not contain function called 'preprocessing'.")
@@ -45,8 +45,10 @@ rdb = redis.StrictRedis(
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in set(settings['data_stream']['allowed_extensions'])
 
+
 def get_file_type(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower()
+
 
 @app.route('/predict', methods=["POST"])
 def predict():
@@ -55,83 +57,59 @@ def predict():
 
     if request.method == "POST":
         # Check if file is inputted
-        # print(request.files)
-
         if 'data' not in request.files:
             flash("No file part")
             raise ValueError("No file part.")
         file = request.files['data']
-        print("FILENAME: ", file.filename)
+        # print("FILENAME: ", file.filename)
         filetype = get_file_type(file.filename)
-        print("FILETYPE: ", filetype)
+        # print("FILETYPE: ", filetype)
         # Check if file name is not empty
         if file.filename == '':
             flash("No selected file")
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            print(filename)
         if request.files.get('data'):
             user_input = request.files["data"].read()
-            if (filetype in ['jpg', 'jpeg', 'png']): # == [ext for ext in ('jpg', 'jpeg', 'png')]
+            if (filetype in ['jpg', 'jpeg', 'png']): 
                 user_input = Image.open(io.BytesIO(user_input))
             else:
                 pass
 
-            preprocessed_input = preprocessing(user_input)
-            
+            preprocessed_input = preprocessing(user_input)           
             # Get file properties
-            if filetype in ['jpg', 'jpeg', 'png']: # == [ext for ext in ('jpg', 'jpeg', 'png')]
+            if filetype in ['jpg', 'jpeg', 'png']: 
                 fileshape = np.array(preprocessed_input).shape
             else:
                 fileshape = preprocessed_input.shape
-
-            print("SHAPE: ", fileshape)
-             
+      
             array_dtype = get_dtype(preprocessed_input)
-            print("DTYPE", array_dtype)
             preprocessed_input = preprocessed_input.copy(order="C")
             encoded_input = base64_encoding(preprocessed_input)
-        # user_input = request.json["text"]
-        # preprocessed_input = preprocessing(user_input)
-        # array_dtype = get_dtype(preprocessed_input)
-        # encoded_input = base64_encoding(preprocessed_input)
-        # endoced_input = encoded_input.copy(order="C")   # make C-contigious?
 
             k = str(uuid.uuid4())
-            d = {"id": k, "filename": filename, "filetype": filetype, "shape": fileshape, "dtype": array_dtype, "data": encoded_input}
+            d = {
+                "id": k, 
+                "filename": filename, 
+                "filetype": filetype, 
+                "shape": fileshape, 
+                "dtype": array_dtype, 
+                "data": encoded_input
+            }
             rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))  # dump the preprocessed input as a numpy array
 
             while True:
                 output = rdb.get(k)
-
                 if output is not None:
                     output = output.decode("utf-8")
                     # print("SUMMARY: ", json.loads(output)[0])
                     data["summary"] = json.loads(output)
-
                     rdb.delete(k)
                     break
 
                 time.sleep(settings['data_stream']['client_sleep'])
             data["success"] = True
-
-        # k = str(uuid.uuid4())
-        # d = {"id": k, "shape": preprocessed_input.shape, "dtype": array_dtype, "data": encoded_input}
-        # rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))    # dump the preprocessed input as a numpy array
-        #
-        # while True:
-        #     output = rdb.get(k)
-        #
-        #     if output is not None:
-        #         output = output.decode("utf-8")
-        #         data["predictions"] = json.loads(output)
-        #
-        #         rdb.delete(k)
-        #         break
-        #
-        #     time.sleep(settings['data_stream']['client_sleep'])
-        # data["success"] = True
-    
+   
     return jsonify(data)    
 
 
@@ -143,16 +121,14 @@ def hello():
 if __name__ == "__main__":
     print((bcolor.BOLD + "* Loading Keras model and Flask starting server... \n"
            "please wait until server has fully started" + bcolor.END))
-    
     # print("* Starting model service... ")
     # t = Thread(target=classify_process, args=())
     # t.daemon
     # t.start()
     
     print("* Starting web service...")
-    app.secret_key = 'super_secret_key'
+    app.secret_key = settings['flask']['secret_key']
     # app.config['SESSION_TYPE'] = 'filesystem'
-
     app.run(
         host=settings['flask']['host'],
         port=int(settings['flask']['port']),

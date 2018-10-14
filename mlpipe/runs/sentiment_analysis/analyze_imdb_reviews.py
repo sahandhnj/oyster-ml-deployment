@@ -3,7 +3,12 @@ import time
 import requests
 import json
 import yaml
-with open("./config/settings.yaml", 'r') as stream:
+
+cwd = os.getcwd()
+print(cwd)
+
+
+with open("../../config/settings.yaml", 'r') as stream:
     try:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:
