@@ -2,7 +2,6 @@ package filemanager
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"path"
 
@@ -90,7 +89,6 @@ func (d *FileStoreManager) WriteToFile(filePath string, content string) error {
 	filePath = path.Join(d.DIR, filePath)
 	byteContent := []byte(content)
 
-	fmt.Println(filePath)
 	return ioutil.WriteFile(filePath, byteContent, 0644)
 }
 

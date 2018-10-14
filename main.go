@@ -7,7 +7,7 @@ import (
 
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/service"
-	"github.com/sahandhnj/apiclient/types/model"
+	"github.com/sahandhnj/apiclient/types"
 
 	"github.com/urfave/cli"
 )
@@ -44,13 +44,14 @@ func main() {
 				name := c.String("name")
 				modelPath := c.String("modelPath")
 				description := c.String("description")
-				model := model.NewModel(0, name, description, modelPath, CurrentDir)
+				model := types.NewModel(name, description, modelPath, CurrentDir)
 
 				modelservice, err := service.NewModelService(model, dbhandler)
 				if err != nil {
 					log.Fatal(err)
 				}
 
+				fmt.Println("Project with following settings has been initialized")
 				modelservice.Model.PrintInfo()
 
 				return nil
@@ -75,17 +76,25 @@ func main() {
 			Aliases: []string{"co"},
 			Usage:   "commit a version",
 			Action: func(c *cli.Context) error {
-				// ver := c.String("version")
-				// modelservice := service.NewModelService()
-				// modelservice, err := model.ReadModel()
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
+				modelservice, err := service.NewModelService(nil, dbhandler)
+				if err != nil {
+					log.Fatal(err)
+				}
 
-				// _, err = version.NewVersion(model)
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
+				versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				err = versionService.NewVersion()
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				fmt.Printf("Version %d has been commited into %s", versionService.Version.VersionNumber, versionService.Version.Name)
+				if err != nil {
+					log.Fatal(err)
+				}
 				return nil
 			},
 			Flags: []cli.Flag{

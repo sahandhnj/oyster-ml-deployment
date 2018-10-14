@@ -2,7 +2,7 @@ package version
 
 import (
 	"github.com/boltdb/bolt"
-	types "github.com/sahandhnj/apiclient/types/version"
+	"github.com/sahandhnj/apiclient/types"
 	"github.com/sahandhnj/apiclient/util"
 )
 
@@ -35,6 +35,31 @@ func (s *Service) Version(ID int) (*types.Version, error) {
 	}
 
 	return &version, nil
+}
+
+func (s *Service) VersionsByModelId(modelId int) ([]types.Version, error) {
+	var versions = make([]types.Version, 0)
+
+	err := s.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(BucketName))
+		cursor := bucket.Cursor()
+
+		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+			var ver types.Version
+			err := util.UnmarshalJsonObject(v, &ver)
+			if err != nil {
+				return err
+			}
+
+			if ver.ModelID == modelId {
+				versions = append(versions, ver)
+			}
+		}
+
+		return nil
+	})
+
+	return versions, err
 }
 
 func (s *Service) VersionByName(name string) (*types.Version, error) {

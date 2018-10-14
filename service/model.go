@@ -5,19 +5,18 @@ import (
 
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/filemanager"
-	"github.com/sahandhnj/apiclient/types/model"
-	"github.com/sahandhnj/apiclient/types/node"
+	"github.com/sahandhnj/apiclient/types"
 	"github.com/sahandhnj/apiclient/util"
 )
 
 type ModelService struct {
-	Model     *model.Model
-	Nodes     []*node.Node `json:"nodes"`
+	Model     *types.Model
+	Nodes     []*types.Node `json:"nodes"`
 	file      *filemanager.FileStoreManager
 	DBHandler *db.DBStore
 }
 
-func NewModelService(model *model.Model, dbHandler *db.DBStore) (*ModelService, error) {
+func NewModelService(model *types.Model, dbHandler *db.DBStore) (*ModelService, error) {
 	file, err := filemanager.NewFileStoreManager()
 	if err != nil {
 		return nil, err
@@ -43,7 +42,7 @@ func NewModelService(model *model.Model, dbHandler *db.DBStore) (*ModelService, 
 		if model == nil {
 			return nil, errors.New("No oyster project found. use init command to start one")
 		}
-		
+
 		model.ID = dbHandler.ModelService.GetNextIdentifier()
 		dbHandler.ModelService.CreateModel(model)
 	}
@@ -59,7 +58,7 @@ func NewModelService(model *model.Model, dbHandler *db.DBStore) (*ModelService, 
 	return &modelService, nil
 }
 
-func ReadModel() (*model.Model, error) {
+func ReadModel() (*types.Model, error) {
 	file, err := filemanager.NewFileStoreManager()
 	if err != nil {
 		return nil, err
@@ -70,7 +69,7 @@ func ReadModel() (*model.Model, error) {
 		return nil, err
 	}
 
-	var model model.Model
+	var model types.Model
 	err = util.UnmarshalYamlObject(data, &model)
 	if err != nil {
 		return nil, err

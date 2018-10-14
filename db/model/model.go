@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/boltdb/bolt"
-	types "github.com/sahandhnj/apiclient/types/model"
+	"github.com/sahandhnj/apiclient/types"
 	"github.com/sahandhnj/apiclient/util"
 )
 
