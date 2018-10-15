@@ -69,48 +69,48 @@ def predict():
             flash("No selected file")
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-        if request.files.get('data'):
-            user_input = request.files["data"].read()
-            if (filetype in ['jpg', 'jpeg', 'png']): 
-                user_input = Image.open(io.BytesIO(user_input))
-            else:
-                pass
+            if request.files.get('data'):
+                user_input = request.files["data"].read()
+                if (filetype in ['jpg', 'jpeg', 'png']):
+                    user_input = Image.open(io.BytesIO(user_input))
+                else:
+                    pass
 
-            preprocessed_input = preprocessing(user_input)           
-            # Get file properties
-            if filetype in ['jpg', 'jpeg', 'png']: 
-                fileshape = np.array(preprocessed_input).shape
-            else:
-                fileshape = preprocessed_input.shape
-      
-            array_dtype = get_dtype(preprocessed_input)
-            preprocessed_input = preprocessed_input.copy(order="C")
-            encoded_input = base64_encoding(preprocessed_input)
+                preprocessed_input = preprocessing(user_input)
+                # Get file properties
+                if filetype in ['jpg', 'jpeg', 'png']:
+                    fileshape = np.array(preprocessed_input).shape
+                else:
+                    fileshape = preprocessed_input.shape
 
-            k = str(uuid.uuid4())
-            d = {
-                "id": k, 
-                "filename": filename, 
-                "filetype": filetype, 
-                "shape": fileshape, 
-                "dtype": array_dtype, 
-                "data": encoded_input
-            }
-            rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))  # dump the preprocessed input as a numpy array
+                array_dtype = get_dtype(preprocessed_input)
+                preprocessed_input = preprocessed_input.copy(order="C")
+                encoded_input = base64_encoding(preprocessed_input)
 
-            while True:
-                output = rdb.get(k)
-                if output is not None:
-                    output = output.decode("utf-8")
-                    # print("SUMMARY: ", json.loads(output)[0])
-                    data["summary"] = json.loads(output)
-                    rdb.delete(k)
-                    break
+                k = str(uuid.uuid4())
+                d = {
+                    "id": k,
+                    "filename": filename,
+                    "filetype": filetype,
+                    "shape": fileshape,
+                    "dtype": array_dtype,
+                    "data": encoded_input
+                }
+                rdb.rpush(settings['data_stream']['data_queue'], json.dumps(d))  # dump the preprocessed input as a numpy array
 
-                time.sleep(settings['data_stream']['client_sleep'])
-            data["success"] = True
+                while True:
+                    output = rdb.get(k)
+                    if output is not None:
+                        output = output.decode("utf-8")
+                        # print("SUMMARY: ", json.loads(output)[0])
+                        data["summary"] = json.loads(output)
+                        rdb.delete(k)
+                        break
+
+                    time.sleep(settings['data_stream']['client_sleep'])
+                data["success"] = True
    
-    return jsonify(data)    
+    return jsonify(data)
 
 
 @app.route("/predict")

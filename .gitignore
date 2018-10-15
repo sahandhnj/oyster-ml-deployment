@@ -17,7 +17,8 @@ dump.rdb
 
 ### Misc. ###
 data/
-runs/
+model/
+refs/
 dog.jpg
 *.pys
 **/*.pys
