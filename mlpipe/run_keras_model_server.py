@@ -55,7 +55,7 @@ def classify_process():
             q = q.decode("utf-8").replace("\'", "\"")
             q = json.loads(q)
             data = base64_decoding(q["data"], q["dtype"], q["shape"])
-            # print("QSHAPE: ", q['shape'], q["filetype"])
+            print("QSHAPE: ", q['shape'], q["filetype"])
             
             if batch is None:
                 batch = data
@@ -64,9 +64,10 @@ def classify_process():
             dataIDs.append(q["id"])
             # Check if it fits in batch and processing is needed
             if len(dataIDs) > 0:
-                # print("Batch size: {}".format(batch.shape))
+                print("Batch size: {}".format(batch.shape))
                 with graph.as_default():
                     predictions = model.predict(batch)
+                # This if statement possibly move out of model server, since imagenet specific
                 if (q["filetype"] in ['jpg', 'jpeg', 'png']):
                     predictions = imagenet_utils.decode_predictions(predictions)
                 else:
@@ -75,7 +76,7 @@ def classify_process():
                 for (dataID, predictionSet) in zip(dataIDs, predictions):
                     output = []
                     for prediction in predictionSet:
-                        # print("PREDICTION: ", prediction, type(predictions))
+                        print("PREDICTION: ", prediction, type(predictions))
                         r = {"result": prediction}  # float() modify prediction as non-array so it can be stored to redis db
                         output.append(r)
                     output.append({
