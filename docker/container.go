@@ -76,6 +76,28 @@ func (c *DockerCli) ContainerStart(id string) error {
 	return nil
 }
 
+func (c *DockerCli) ContainerStop(id string) error {
+	ctx := context.Background()
+
+	err := c.cli.ContainerStop(ctx, id, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *DockerCli) ContainerDelete(id string) error {
+	ctx := context.Background()
+
+	err := c.cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *DockerCli) PrntLogs(id string) {
 	ctx := context.Background()
 

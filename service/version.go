@@ -191,6 +191,45 @@ func (vs *VersionService) Start(versionNumber int, dcli *docker.DockerCli) error
 	return nil
 }
 
+func (vs *VersionService) Stop(versionNumber int, dcli *docker.DockerCli) error {
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
+	if err != nil {
+		return err
+	}
+
+	if version.RedisEnabled {
+		dcli.ContainerStop(version.RedisContainerId)
+	}
+
+	dcli.ContainerStop(version.ContainerId)
+
+	return nil
+}
+
+func (vs *VersionService) Down(versionNumber int, dcli *docker.DockerCli) error {
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
+	if err != nil {
+		return err
+	}
+
+	if version.RedisEnabled {
+		dcli.ContainerDelete(version.RedisContainerId)
+		version.RedisContainerId= ""
+	}
+
+	dcli.ContainerDelete(version.ContainerId)
+	version.ContainerId = ""
+
+	if version.NetworkId != "" {
+		dcli.NetworkDelete(version.NetworkId)
+		version.NetworkId = ""
+	}
+
+	vs.DBHandler.VersionService.UpdateVersion(version.ID, version)
+
+	return nil
+}
+
 func (vs *VersionService) Apply() error {
 	fm, err := filemanager.NewFileStoreManager()
 	if err != nil {

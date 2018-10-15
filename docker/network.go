@@ -25,3 +25,14 @@ func (c *DockerCli) ConnectToNetwork(networkId string, containerId string) error
 
 	return nil
 }
+
+func (c *DockerCli) NetworkDelete(networkId string) error {
+	ctx := context.Background()
+
+	err := c.cli.NetworkRemove(ctx, networkId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

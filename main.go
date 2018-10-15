@@ -201,6 +201,74 @@ func main() {
 						return nil
 					},
 				},
+				{
+					Name:  "stop",
+					Usage: "stop containers of version",
+					Action: func(c *cli.Context) error {
+						versionNumber := c.Args().Get(0)
+						if versionNumber == "" {
+							log.Fatal("You have to specify the version number")
+						}
+
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						dc := docker.NewDockerCli()
+
+						vnum, err := strconv.Atoi(versionNumber)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.Stop(vnum, dc)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+				},
+				{
+					Name:  "down",
+					Usage: "delete containers of version",
+					Action: func(c *cli.Context) error {
+						versionNumber := c.Args().Get(0)
+						if versionNumber == "" {
+							log.Fatal("You have to specify the version number")
+						}
+
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						dc := docker.NewDockerCli()
+
+						vnum, err := strconv.Atoi(versionNumber)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.Down(vnum, dc)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+				},
 			},
 		},
 		{
@@ -214,79 +282,6 @@ func main() {
 				}
 
 				modelservice.Model.PrintInfo()
-
-				return nil
-			},
-		},
-		{
-			Name:    "test",
-			Aliases: []string{"t"},
-			Usage:   "test",
-			Action: func(c *cli.Context) error {
-				// dbhandler := db.NewDBStore()
-				// model, err := model.NewModel("name", "description", "model")
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
-
-				// model.PrintInfo()
-
-				return nil
-			},
-		},
-		{
-			Name:    "deploy",
-			Aliases: []string{"d"},
-			Usage:   "deploy the model",
-			Action: func(c *cli.Context) error {
-				// model, err := model.ReadModel()
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
-
-				// model.PrintInfo()
-
-				// fmt.Println("Deploying docker image")
-
-				// dc := docker.NewDockerCli()
-				// names := dc.DeployStack(model.Config.Name)
-				// nodes := make([]*node.Node, 0)
-
-				// for _, id := range names {
-				// 	fmt.Println("Reading logs of: ", dc.GetContainerImageName(id))
-
-				// 	_, node := node.NewNode(dc.GetContainerImageName(id), model.Config.ID, id, node.Running)
-				// 	nodes = append(nodes, node)
-				// 	go dc.ShowLogs(id)
-				// }
-
-				// model.Nodes = nodes
-
-				// fmt.Print("Press 'Enter' to continue...")
-				// bufio.NewReader(os.Stdin).ReadBytes('\n')
-				return nil
-			},
-		},
-		{
-			Name:    "list",
-			Aliases: []string{"l"},
-			Usage:   "list APIs",
-			Action: func(c *cli.Context) error {
-				fmt.Println("List of docker containers")
-
-				// TODO
-
-				return nil
-			},
-		},
-		{
-			Name:    "drop",
-			Aliases: []string{"l"},
-			Usage:   "drop all container APIs",
-			Action: func(c *cli.Context) error {
-				fmt.Println("Dropping docker containers")
-
-				// TODO
 
 				return nil
 			},
