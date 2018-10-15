@@ -1,6 +1,7 @@
 package filemanager
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/mholt/archiver"
@@ -21,6 +22,6 @@ func (f *FileStoreManager) CTarGz(output string, content []string, internal bool
 func (f *FileStoreManager) XTarGz(input string, output string) error {
 	output = path.Join(f.DIR, output)
 	input = path.Join(f.DIR, input)
-
+	fmt.Println(input, output)
 	return archiver.Zip.Open(input, output)
 }

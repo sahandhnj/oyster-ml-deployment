@@ -5,13 +5,17 @@ import (
 )
 
 type Version struct {
-	ID            int    `json:"id"`
-	Name          string `json:"name"`
-	VersionNumber int    `json:"version_number"`
-	ModelID       int    `json:"project_id"`
-	Deployed      bool   `json:"deployed"`
-	ImageTag      string `json:"image_tag"`
-	ContainerId   string `json:"container_id"`
+	ID               int    `json:"id"`
+	Name             string `json:"name"`
+	VersionNumber    int    `json:"version_number"`
+	ModelID          int    `json:"project_id"`
+	Deployed         bool   `json:"deployed"`
+	ImageTag         string `json:"image_tag"`
+	ContainerId      string `json:"container_id"`
+	RedisEnabled     bool   `json:"redis_enabled"`
+	RedisContainerId string `json:"redis_container_id"`
+	NetworkId        string `json:"network_id"`
+	Port             int    `json:"port"`
 }
 
 const (
@@ -26,6 +30,7 @@ func NewVersion(versionNumber int, modelId int) (*Version, error) {
 		VersionNumber: versionNumber,
 		ModelID:       modelId,
 		Deployed:      false,
+		RedisEnabled:  false,
 	}
 
 	return &v, nil

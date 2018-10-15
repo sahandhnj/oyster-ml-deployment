@@ -11,7 +11,6 @@ import (
 
 type ModelService struct {
 	Model     *types.Model
-	Nodes     []*types.Node `json:"nodes"`
 	file      *filemanager.FileStoreManager
 	DBHandler *db.DBStore
 }
@@ -23,7 +22,6 @@ func NewModelService(model *types.Model, dbHandler *db.DBStore) (*ModelService, 
 	}
 
 	modelService := ModelService{
-		Nodes:     nil,
 		file:      file,
 		DBHandler: dbHandler,
 	}

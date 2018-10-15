@@ -167,6 +167,40 @@ func main() {
 						},
 					},
 				},
+				{
+					Name:  "start",
+					Usage: "start containers of version",
+					Action: func(c *cli.Context) error {
+						versionNumber := c.Args().Get(0)
+						if versionNumber == "" {
+							log.Fatal("You have to specify the version number")
+						}
+
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						dc := docker.NewDockerCli()
+
+						vnum, err := strconv.Atoi(versionNumber)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						err = versionService.Start(vnum, dc)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+				},
 			},
 		},
 		{
