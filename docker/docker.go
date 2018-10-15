@@ -151,7 +151,7 @@ func (c *DockerCli) ShowLogs(ID string) {
 	io.Copy(os.Stdout, out)
 }
 
-func (c *DockerCli) CreateContainer() {
+func (c *DockerCli) CreateAndRunContainer() {
 	ctx := context.Background()
 
 	buf := new(bytes.Buffer)

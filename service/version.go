@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strconv"
 
 	"github.com/sahandhnj/apiclient/docker"
@@ -68,6 +69,7 @@ func (vs *VersionService) NewVersion() error {
 	}
 
 	vs.Version = version
+
 	err = vs.Apply()
 	if err != nil {
 		return err
@@ -82,9 +84,9 @@ func (vs *VersionService) PrintVersions() error {
 		return err
 	}
 
-	fmt.Printf("%s\t%s\t%s\n", "Name", "Version number", "Deployed")
+	fmt.Printf("%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag")
 	for _, ver := range versions {
-		fmt.Printf("%s\t%d\t%t\n", ver.Name, ver.VersionNumber, ver.Deployed)
+		fmt.Printf("%s\t%d\t%t\t\t%s\n", ver.Name, ver.VersionNumber, ver.Deployed, ver.ImageTag)
 	}
 
 	return nil
@@ -122,6 +124,23 @@ func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verb
 			return err
 		}
 	}
+
+	version.ImageTag = mainTag
+	hostName := vs.Model.Name + "" + strconv.Itoa(version.VersionNumber) + "-api"
+
+	mountPath, err := filepath.Abs(vs.file.GetStorePath(version.Name))
+	if err != nil {
+		return err
+	}
+
+	containerId, err := dcli.CreateContainer(hostName, version.ImageTag, []string{"ls"}, mountPath)
+	if err != nil {
+		return err
+	}
+
+	version.ContainerId = containerId
+
+	vs.DBHandler.VersionService.UpdateVersion(version.ID, version)
 
 	return nil
 }

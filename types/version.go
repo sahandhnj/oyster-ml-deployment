@@ -10,6 +10,8 @@ type Version struct {
 	VersionNumber int    `json:"version_number"`
 	ModelID       int    `json:"project_id"`
 	Deployed      bool   `json:"deployed"`
+	ImageTag      string `json:"image_tag"`
+	ContainerId   string `json:"container_id"`
 }
 
 const (

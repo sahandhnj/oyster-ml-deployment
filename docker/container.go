@@ -7,8 +7,44 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
 	"golang.org/x/net/context"
 )
+
+func (c *DockerCli) CreateContainer(hostName string, imageTag string, cmd []string, mountPath string) (string, error) {
+	ctx := context.Background()
+
+	resp, err := c.cli.ContainerCreate(ctx, &container.Config{
+		Hostname: hostName,
+		// Domainname:   hostName,
+		Image: imageTag,
+		Cmd:   cmd,
+		// Tty:          true,
+		// AttachStderr: true,
+		// AttachStdout: true,
+		// Labels: map[string]string{
+		// 	"rsc": hostName,
+		// },
+	}, &container.HostConfig{
+		AutoRemove: true,
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeBind,
+				Source: mountPath,
+				Target: "/src",
+			},
+		},
+	}, nil, hostName)
+
+	fmt.Println(resp)
+
+	if err != nil {
+		return "", err
+	}
+
+	return resp.ID, nil
+}
 
 func (c *DockerCli) PrntLogs(id string) {
 	ctx := context.Background()
