@@ -67,18 +67,21 @@ def classify_process():
                 print("Batch size: {}".format(batch.shape))
                 with graph.as_default():
                     predictions = model.predict(batch)
+                # print("PREDICITONS: ", predictions, type(predictions))
+                
                 # This if statement possibly move out of model server, since imagenet specific
-                if (q["filetype"] in ['jpg', 'jpeg', 'png']):
-                    predictions = imagenet_utils.decode_predictions(predictions)
-                else:
-                    pass
+                # if (q["filetype"] in ['jpg', 'jpeg', 'png']):
+                #     predictions = imagenet_utils.decode_predictions(predictions)
+                # else:
+                #     pass
+                # print("PREDICTIONS: ", predictions)
 
-                for (dataID, predictionSet) in zip(dataIDs, predictions):
+                for (dataID, prediction) in zip(dataIDs, predictions):
                     output = []
-                    for prediction in predictionSet:
-                        print("PREDICTION: ", prediction, type(predictions))
-                        r = {"result": prediction}  # float() modify prediction as non-array so it can be stored to redis db
-                        output.append(r)
+                    # for prediction in predictionSet:
+                    # print("PREDICTION: ", prediction, type(predictions))
+                    r = {"result": prediction}  # float() modify prediction as non-array so it can be stored to redis db
+                    output.append(r)
                     output.append({
                         "input": {
                             "uid": dataID,
