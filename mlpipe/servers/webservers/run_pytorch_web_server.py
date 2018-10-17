@@ -1,20 +1,25 @@
-import time
-import json
-import yaml
-import uuid
+import os, sys, time, json, yaml, uuid
 import redis
 import torch
 import numpy as np
 from PIL import Image
-from config.clistyle import bcolor
 from werkzeug.utils import secure_filename
 from flask import Flask, request, flash, jsonify
-from helpers import base64_encoding, get_dtype
+mlpipe_root = os.path.abspath("../..")
+# sys.path.insert(1, os.path.join(sys.path[0], mlpipe_root)
+sys.path.insert(0, mlpipe_root)
+
+# for p in sys.path:
+#     print(p + "\n")
+# print(mlpipe_root)
+
+from config.clistyle import bcolor
+from servers.helpers.helperfunctions import base64_encoding, get_dtype
 
 # Preprocessing specific
 from torchvision import transforms
 
-with open("./config/settings.yaml", 'r') as stream:
+with open(mlpipe_root + "/config/settings.yaml", 'r') as stream:
     try:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:

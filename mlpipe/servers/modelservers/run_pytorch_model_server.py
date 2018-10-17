@@ -1,13 +1,19 @@
-import time
-import json
-import yaml
+import os, sys, time, json, yaml
 import redis
-import numpy as np
-from config.clistyle import bcolor
-from helpers import base64_decoding, NumpyEncoder
 import torch
+import numpy as np
+# sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+mlpipe_root = os.path.abspath("../..")
+sys.path.insert(0, mlpipe_root)
 
-with open("./config/settings.yaml", 'r') as stream:
+# for p in sys.path:
+#     print(p)
+
+from config.clistyle import bcolor
+from servers.helpers.helperfunctions import base64_decoding, NumpyEncoder
+
+
+with open(mlpipe_root + "/config/settings.yaml", 'r') as stream:
     try:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:
@@ -28,8 +34,8 @@ def get_device():
 # Also pass along grad_fn
 
 
-def get_paths():
-    model_dir = settings['model']['pathdir']
+def get_paths(root_path):
+    model_dir = root_path + settings['model']['pathdir']
     graph_file = settings['model']['graph_file']
     weights_file = settings['model']['weights_file']
     graph = model_dir + graph_file
@@ -40,6 +46,8 @@ def get_paths():
 
 def load_model(model_file_path, weights_file_path, graph_file, weights_file):
     global model
+
+    print("MODEL PATH: ", model_file_path)
 
     model = torch.load(model_file_path)
     model_weights = torch.load(weights_file_path)
@@ -65,7 +73,7 @@ def torchTensor_detach_and_to_array(tensor):
 def classify_process():
     
     device = get_device()
-    graph_path, graph_file, weights_path, weights_file = get_paths()
+    graph_path, graph_file, weights_path, weights_file = get_paths(root_path=mlpipe_root)
     model = load_model(graph_path, weights_path, graph_file, weights_file)
 
     while True:

@@ -8,7 +8,10 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 # Define path
-data_dir = '/home/bloks/Projects/Sentriq/apiclient/mlpipe/runs/pytorch/data/hymenoptera_data/test/'
+cwd = os.path.abspath('.')
+print(cwd)
+
+data_dir = cwd + '/data/hymenoptera_data/test/'
 
 def stream(file):
     filecontent = open(file, 'rb')

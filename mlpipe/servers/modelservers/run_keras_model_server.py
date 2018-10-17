@@ -1,15 +1,17 @@
-import time
-import json
-import yaml
+import os, sys, inspect, time, json, yaml
 import redis
 import numpy as np
 import tensorflow as tf
 from keras.applications import imagenet_utils
+# sys.path.insert(1, os.path.join(sys.path[0], '../..'))  # insert mlpipe root to path
+mlpipe_root = os.path.abspath("../..")
+sys.path.insert(0, mlpipe_root)
+
 from config.clistyle import bcolor
 from keras.models import model_from_json
-from helpers import base64_decoding, NumpyEncoder
+from servers.helpers.helperfunctions import base64_decoding, NumpyEncoder
 
-with open("./config/settings.yaml", 'r') as stream:
+with open(mlpipe_root + "/config/settings.yaml", 'r') as stream:
     try:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:
@@ -22,14 +24,20 @@ rdb = redis.StrictRedis(
     db=settings['redis']['db']
 )
 
-model_dir = settings['model']['pathdir']
-graph_file = settings['model']['graph_file']
-weights_file = settings['model']['weights_file']
 
-def load_model(model_file_path, weights_file_path):
+def get_paths(root_path):
+    model_dir = root_path + settings['model']['pathdir']
+    graph_file = settings['model']['graph_file']
+    weights_file = settings['model']['weights_file']
+    graph = model_dir + graph_file
+    weights = model_dir + weights_file
+    
+    return graph, graph_file, weights, weights_file
+
+
+def load_model(model_file_path, weights_file_path, graph_file, weights_file):
     global model
 
-    
     with open("{}".format(model_file_path), 'r') as model_json_file:
         loaded_model_json = model_json_file.read()
     loaded_model = model_from_json(loaded_model_json)
@@ -43,7 +51,9 @@ def load_model(model_file_path, weights_file_path):
 
 
 def classify_process():
-    model = load_model(model_dir + graph_file, model_dir + weights_file)
+    
+    graph_path, graph_file, weights_path, weights_file = get_paths(mlpipe_root)
+    model = load_model(graph_path, weights_path, graph_file, weights_file)
 
     while True:
         queue = rdb.lrange(
