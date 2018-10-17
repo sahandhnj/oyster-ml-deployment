@@ -13,10 +13,10 @@ import io
 import numpy as np
 
 try:
-    from runs.imagenet import preprocessing as prepmod
+    from runs.sentiment_analysis import preprocessing as prepmod
 
     if hasattr(prepmod, 'preprocessing') and inspect.isfunction(prepmod.preprocessing):
-        from runs.imagenet.preprocessing import preprocessing
+        from runs.sentiment_analysis.preprocessing import preprocessing
         print("Preprocessing file available and loaded into vessel.")
     else:
         raise TypeError("Preprocessing file inserted, but does not contain function called 'preprocessing'.")

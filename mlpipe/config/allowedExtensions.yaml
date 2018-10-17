@@ -1,0 +1,32 @@
+models:
+  tensorflow:
+    graphs:
+      
+    weights:
+      
+  keras:
+    graphs:
+      - 'json'
+      - 'yaml'
+      - 'yml'
+    weights:
+      - 'h5'
+  pytorch:
+    graphs:
+      - 'json'
+    weights:
+      - 'h5'
+files:
+  images:
+    - 'jpg'
+    - 'jpeg'
+    - 'png'
+    - 'ppm'
+    - 'bmp'
+    - 'pgm'
+    - 'tif'
+  numeric:
+    - 'csv'
+    - 'tsv'
+  other:
+    - 'json'
