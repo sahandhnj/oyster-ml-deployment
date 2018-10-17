@@ -23,9 +23,9 @@ data_stream:
     - 'json'
 model:
   module: 'keras'
-  pathdir: "./runs/sentiment_analysis/model/"
-  graph_file: "model.json"
-  weights_file: "model_weights.h5"
+  pathdir: "./runs/pytorch/model/"
+  graph_file: "resnet18_sinp.json"
+  weights_file: "resnet18_sinp_weights.h5"
   api_endpoint: "http://localhost:5000/predict"
 
 

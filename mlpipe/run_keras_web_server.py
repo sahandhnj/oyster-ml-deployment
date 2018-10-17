@@ -60,7 +60,7 @@ def predict():
         if 'data' not in request.files:
             flash("No file part")
             raise ValueError("No file part.")
-        file = request.files['data']
+        file = request.files['data']    ### Redundant?
         # print("FILENAME: ", file.filename)
         filetype = get_file_type(file.filename)
         # print("FILETYPE: ", filetype)

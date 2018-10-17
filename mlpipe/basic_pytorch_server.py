@@ -10,35 +10,31 @@ from helpers import NumpyEncoder
 import json
 
 app = Flask(__name__)
-
 model = None
 use_gpu = False
 
 def load_model(model_file_path, weights_file_path):
     global model
-
     model = torch.load(model_file_path)
     model_weights = torch.load(weights_file_path)
     model.load_state_dict(model_weights)
     # if use_gpu:
     #     model.cuda()
-
     return model
-
-
-    def torchTensor_to_npArray(tensor):
-        """Detatch Tensor, write to cpu, conver to numpy array
-        """
-        # Do checks first
-        with torch.no_grad():
-            print("TENS1: ", tensor)
-            tensor_detatched = tensor.detach()
-            print("TENS2: ", tensor_detatched)
-            tensor_cpu = tensor_detatched.cpu()
-            print("TENS3: ", tensor_cpu)
-            np_array = tensor_cpu.numpy()
-            print("ARR: ", np_array)
-        return np_array
+    
+def torchTensor_to_npArray(tensor):
+    """Detatch Tensor, write to cpu, conver to numpy array
+    """
+    # Do checks first
+    with torch.no_grad():
+        print("TENS1: ", tensor)
+        tensor_detatched = tensor.detach()
+        print("TENS2: ", tensor_detatched)
+        tensor_cpu = tensor_detatched.cpu()
+        print("TENS3: ", tensor_cpu)
+        np_array = tensor_cpu.numpy()
+        print("ARR: ", np_array)
+    return np_array
 
 def preprocessing(image):
     # Define preprocessing transformation
@@ -50,20 +46,16 @@ def preprocessing(image):
     ])
     preprocessed = composed(image)
     preprocessed.unsqueeze_(0)  # Set correct batch dimension
-
     return preprocessed
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 model = load_model('./runs/pytorch/model/resnet18_sinp.json', './runs/pytorch/model/resnet18_sinp_weights.h5')
-
 
 def classify_process(model, inputs):
     model.eval()
     model.training = False
     output = model(inputs)
     return output
-
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -87,6 +79,5 @@ def predict():
 
     return output_json
 
-
 if __name__ == "__main__":
-    app.run()
+    app.run() 
