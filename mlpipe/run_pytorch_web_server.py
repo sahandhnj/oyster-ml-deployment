@@ -1,20 +1,18 @@
-from flask import Flask, request, jsonify
-import torch
-import numpy as np
-import torchvision
-from torchvision import datasets, models, transforms
-import matplotlib.pyplot as plt
-from werkzeug.utils import secure_filename
-import os
-from PIL import Image
-from helpers import NumpyEncoder
+import time
 import json
 import yaml
 import uuid
 import redis
-import time
-
+import torch
+import numpy as np
+from PIL import Image
+from config.clistyle import bcolor
+from werkzeug.utils import secure_filename
+from flask import Flask, request, flash, jsonify
 from helpers import base64_encoding, get_dtype
+
+# Preprocessing specific
+from torchvision import transforms
 
 with open("./config/settings.yaml", 'r') as stream:
     try:
@@ -23,14 +21,11 @@ with open("./config/settings.yaml", 'r') as stream:
         print(exc)
 
 # TBD after merge
-with open("./config/allowedExtns.yaml", 'r') as stream:
-    try:
-        allowed_extensions = yaml.load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
-
-
-
+# with open("./config/allowedExtns.yaml", 'r') as stream:
+#     try:
+#         allowed_extensions = yaml.load(stream)
+#     except yaml.YAMLError as exc:
+#         print(exc)
 
 app = Flask(__name__)
 rdb = redis.StrictRedis(
@@ -41,19 +36,16 @@ rdb = redis.StrictRedis(
 
 # rdb.flushall()
 
-model = None
-use_gpu = False
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in set(settings['data_stream']['allowed_extensions'])
 
-def load_model(model_file_path, weights_file_path):
-    global model
 
-    model = torch.load(model_file_path)
-    model_weights = torch.load(weights_file_path)
-    model.load_state_dict(model_weights)
-    # if use_gpu:
-    #     model.cuda()
+def get_file_type(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower()
 
-    return model
+
+# def get_device():
+#     return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def torchTensor_to_npArray(tensor):
@@ -70,6 +62,7 @@ def torchTensor_to_npArray(tensor):
         print("ARR: ", np_array)
     return np_array
 
+
 def preprocessing(image):
     # Define preprocessing transformation
     composed = transforms.Compose([
@@ -83,39 +76,21 @@ def preprocessing(image):
 
     return preprocessed
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-model = load_model('./runs/pytorch/model/resnet18_sinp.json', './runs/pytorch/model/resnet18_sinp_weights.h5')
-
-
-def classify_process(model, inputs):
-    model.eval()
-    model.training = False
-    output = model(inputs)
-    return output
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in set(settings['data_stream']['allowed_extensions'])
-
-def get_file_type(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower()
-
 
 @app.route("/predict", methods=["POST"])
 def predict():
     
+    # device = get_device()
     data = {"success": False}
 
     if request.method == "POST":
         # Check if file in inputted
         if 'data' not in request.files:
-            flash("Nof ile part")
+            flash("No file part")
             raise ValueError("No file part")
         # print("METHOD: ", request.method)
-        file = request.files['data']    # Redundant?
+        file = request.files['data']
         filetype = get_file_type(file.filename)
-        # print("FILE: ", file)
         if file.filename == '':
             flash("No selected file")
             raise ValueError("No selected file")
@@ -123,23 +98,17 @@ def predict():
             filename = secure_filename(file.filename)
             if request.files.get('data'):
                 user_input = request.files["data"]  #.read()
-                # print("UI1: ", user_input)
-                # user_input = request.files["data"].read()
-                # print("UI1R: ", user_input)
                 if (filetype in ['jpg', 'jpeg', 'png']):
                     user_input = Image.open(user_input)
                 else:
                     pass
         
-                preprocessed_input = preprocessing(user_input)
-                # print("PEPROCESSED: ", preprocessed_input)
-                
+                preprocessed_input = preprocessing(user_input)               
                 # Get file properties
                 if filetype in ['jpg', 'jpeg', 'png']:
                     fileshape = np.array(preprocessed_input).shape
                 else:
                     fileshape = preprocessed_input.shape
-                print("FILESHAPE: ", fileshape)
 
                 array_dtype = get_dtype(preprocessed_input)
                 # HANDLE TORCH TENSORS
@@ -149,8 +118,7 @@ def predict():
                 #     ### convert torch to numpy
                 #     output_np = torchTensor_to_npArray(output1)
                 
-                preprocessed_input = preprocessed_input.numpy()
-                # print("NP PREP: ", preprocessed_input)               
+                preprocessed_input = preprocessed_input.numpy()         
                 preprocessed_input = preprocessed_input.copy(order="C")
                 encoded_input = base64_encoding(preprocessed_input)
 
@@ -167,7 +135,6 @@ def predict():
 
                 # Can i also send and receive torch tensors via redis?
                 # or setup automated function to resore them from np array
-
                 while True:
                     output = rdb.get(k)
                     if output is not None:
@@ -178,28 +145,17 @@ def predict():
                     
                     time.sleep(settings['data_stream']['client_sleep'])
                 data["success"] = True
-                # print("OUTPUT: ", output)
-    return jsonify(data)
 
-        # print("USER_INPUT: ", user_input)
-        
-        
-        
-    #     # print("DEVICE: ", device)
-    #     image = Image.open(file)
-    #     # print("IMAGE: ", image)
-    #     tfd1 = preprocessing(image)
-    #     # print("PREPPED:", tfd1)
-    #     output1 = classify_process(model=model, inputs=tfd1.to(device))
-    #     # print("OUTPUT: ", output1)
-    #     ### convert torch to numpy
-    #     output_np = torchTensor_to_npArray(output1)
-    #     # print("OUTPUT NP: ", output_np)
-    #     output_json = json.dumps(output_np, cls=NumpyEncoder)
-    #     # print("OUTPUT JSON", output_json)
-
-    # return output_json
-
+    return jsonify(data)    
+       
 
 if __name__ == "__main__":
-    app.run(port=5001)
+    print((bcolor.BOLD + "* Loading PyTorch webserver... \n"
+           "please wait until server has fully started" + bcolor.END))   
+    print("* Starting web service...")
+    app.secret_key = settings['flask']['secret_key']
+    app.run(
+        host=settings['flask']['host'],
+        port=int(settings['flask']['port']),
+        debug=settings['flask']['debug']
+    )

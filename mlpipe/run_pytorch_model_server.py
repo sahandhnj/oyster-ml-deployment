@@ -3,16 +3,9 @@ import json
 import yaml
 import redis
 import numpy as np
-# import tensorflow as tf
-# from keras.applications import imagenet_utils
 from config.clistyle import bcolor
-# from keras.models import model_from_json
 from helpers import base64_decoding, NumpyEncoder
 import torch
-
-# Give along device details at input
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# Also pass along grad_fn
 
 with open("./config/settings.yaml", 'r') as stream:
     try:
@@ -26,27 +19,54 @@ rdb = redis.StrictRedis(
     db=settings['redis']['db']
 )
 
-model_dir = settings['model']['pathdir']
-graph_file = settings['model']['graph_file']
-weights_file = settings['model']['weights_file']
-
 model = None
-use_gpu = False
+use_gpu = False ###
 
-def load_model(model_file_path, weights_file_path):
+# Give along device details at input
+def get_device():
+    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# Also pass along grad_fn
+
+
+def get_paths():
+    model_dir = settings['model']['pathdir']
+    graph_file = settings['model']['graph_file']
+    weights_file = settings['model']['weights_file']
+    graph = model_dir + graph_file
+    weights = model_dir + weights_file
+    
+    return graph, graph_file, weights, weights_file
+
+
+def load_model(model_file_path, weights_file_path, graph_file, weights_file):
     global model
 
     model = torch.load(model_file_path)
     model_weights = torch.load(weights_file_path)
     model.load_state_dict(model_weights)
-    # if use_gpu:
-    #     model.cuda()
+    if use_gpu:
+        model.cuda()
+    model.eval()        ###
+    model.training = False  ###
     print(bcolor.BOLD + "Loaded PyTorch model '{}' from disk and inserted weights from '{}'.".format(graph_file, weights_file) + bcolor.END)
 
     return model
 
+
+def torchTensor_detach_and_to_array(tensor):
+    with torch.no_grad():
+        tensor_detached = tensor.detach()
+        tensor_cpu = tensor_detached.cpu()
+        np_array = tensor_cpu.numpy()
+        
+        return np_array
+
+
 def classify_process():
-    model = load_model(model_dir + graph_file, model_dir + weights_file)
+    
+    device = get_device()
+    graph_path, graph_file, weights_path, weights_file = get_paths()
+    model = load_model(graph_path, weights_path, graph_file, weights_file)
 
     while True:
         queue = rdb.lrange(
@@ -64,33 +84,14 @@ def classify_process():
             else:
                 batch = np.vstack([batch, data])
             dataIDs.append(q["id"])
-            print(dataIDs)
             if len(dataIDs) > 0:
                 print("Batch size: {}".format(batch.shape))
                 predictions = model(torch.from_numpy(batch).to(device)) # Torch, set device
 
-                print("PREDICTIONS: ", predictions)
                 for (dataID, prediction) in zip(dataIDs, predictions):
                     output = []
-                    
-                    print("PREDICTION: ", prediction)
-
-                    # Wrap in pytorch specific function later on
-                    def torchTensor_detach_and_to_array(tensor):
-                        with torch.no_grad():
-                            tensor_detached = tensor.detach()
-                            print("DETACHED: ", tensor_detached)
-                            tensor_cpu = tensor_detached.cpu()
-                            print("TENSOR CPU: ", tensor_cpu)
-                            np_array = tensor_cpu.numpy()
-                            print("NP ARR: ", np_array)
-                            print(type(np_array))
-                            print(np_array.dtype)
-                            return np_array
-                        
+                    # Wrap in pytorch specific function later on                       
                     r = {"result": torchTensor_detach_and_to_array(prediction)}  # transform prediciton to np array
-                    print(r)
-
                     output.append(r)
                     output.append({
                         "input": {
@@ -108,7 +109,3 @@ def classify_process():
 
 if __name__ == "__main__":
     classify_process()
-
-
-# print(model)
-# print(model.state_dict())
