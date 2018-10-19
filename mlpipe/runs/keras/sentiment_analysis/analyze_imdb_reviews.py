@@ -8,6 +8,13 @@ cwd = os.getcwd()
 print(cwd)
 
 
+# with open("../../../config/settings.yaml", 'r') as stream:
+#     try:
+#         settings = yaml.load(stream)
+#     except yaml.YAMLError as exc:
+#         print(exc)
+
+
 cwd = os.getcwd()
 data_dir = cwd + "/tweets/"
 
@@ -39,7 +46,7 @@ def feedstream(file, sleep=0.05, verbose=1, *args, **kwargs):
 results = []
 for t in tweet_files:
     resp = feedstream(t, verbose=0)
-    prediction = resp['summary'][0]['result']
+    prediction = resp['summary'][0]['result'][0]    
     success = resp["success"]
     inputfile = resp['summary'][1]['input']['filename']
     filecontent = open(data_dir + t).read()

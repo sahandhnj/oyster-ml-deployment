@@ -8,6 +8,13 @@ apiclient
 oyster.yml
 
 
+### Python ###
+# __pycache__
+*.pys
+**/*.pys
+# *.pyc
+# **/*.pyc
+
 ### Redis ###
 dump.rdb
 
@@ -27,3 +34,4 @@ debug/.oyster
 debug/model2
 mlpipe/runs/sentiment_analysis/tweets
 mlpipe/runs/sentiment_analysis/apivenv
+refs/

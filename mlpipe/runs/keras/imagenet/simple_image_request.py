@@ -1,13 +1,12 @@
-import requests
-
 import os
+import requests
+import numpy as np
+from keras.applications import imagenet_utils
 
 cwd = os.getcwd()
 image_dir = cwd + "/data/images/"
 
 image_files = os.listdir(image_dir)
-image1 = image_files[0]
-print(image1)
 
 def stream(file):
     # load the input image and construct the payload for the request
@@ -21,9 +20,12 @@ def stream(file):
 
 for i in image_files:
     resp = stream(i)
-    prediction = resp["summary"][0]['result'][1]
-    pred_val = resp["summary"][0]['result'][2]
-    print(prediction, pred_val)
+    prediction = resp["summary"][0]['result']
+    np_prediction = np.array([prediction])
+    pred = imagenet_utils.decode_predictions(np_prediction)
+    pred_name = pred[0][0][1]
+    pred_val = pred[0][0][2]
 
+    print("PREDICTED: {0:<30s} \tCERTAINTY: {1:.3f}".format(pred_name, pred_val))
 
 

@@ -1,29 +1,32 @@
-import time
-import uuid
-import json
-import inspect
-import yaml
+import os, io, sys, inspect, time, json, yaml, uuid
 import redis
-from config.clistyle import bcolor
-from flask import Flask, request, jsonify, flash
-from werkzeug.utils import secure_filename
-from helpers import base64_encoding, get_dtype
 from PIL import Image
-import io
+from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, flash
 import numpy as np
+# sys.path.insert(1, os.path.join(sys.path[0], '../..'))  # insert mlpipe root to path
+mlpipe_root = os.path.abspath("../..")
+sys.path.insert(0, mlpipe_root)
+
+
+
+# Set multiple paths for run testing period
+
+from config.clistyle import bcolor
+from servers.helpers.helperfunctions import base64_encoding, get_dtype
 
 try:
-    from runs.imagenet import preprocessing as prepmod
+    from runs.keras.sentiment_analysis import preprocessing as prepmod
 
     if hasattr(prepmod, 'preprocessing') and inspect.isfunction(prepmod.preprocessing):
-        from runs.imagenet.preprocessing import preprocessing
+        from runs.keras.sentiment_analysis.preprocessing import preprocessing
         print("Preprocessing file available and loaded into vessel.")
     else:
         raise TypeError("Preprocessing file inserted, but does not contain function called 'preprocessing'.")
 except (ImportError):
     print("No preprocessing file inserted.")
 
-with open("./config/settings.yaml", 'r') as stream:
+with open(mlpipe_root + "/config/settings.yaml", 'r') as stream:
     try:
         settings = yaml.load(stream)
     except yaml.YAMLError as exc:
@@ -60,7 +63,7 @@ def predict():
         if 'data' not in request.files:
             flash("No file part")
             raise ValueError("No file part.")
-        file = request.files['data']
+        file = request.files['data']    ### Redundant?
         # print("FILENAME: ", file.filename)
         filetype = get_file_type(file.filename)
         # print("FILETYPE: ", filetype)
