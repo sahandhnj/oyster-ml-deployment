@@ -30,7 +30,7 @@ func NewVersion(versionNumber int, modelId int) (*Version, error) {
 		VersionNumber: versionNumber,
 		ModelID:       modelId,
 		Deployed:      false,
-		RedisEnabled:  false,
+		RedisEnabled:  true,
 	}
 
 	return &v, nil

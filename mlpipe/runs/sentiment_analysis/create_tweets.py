@@ -51,9 +51,9 @@ tweet_list = [
 ]
 
 for tweet in tweet_list:
-    with open(data_dir + "review" + str(uuid.uuid4())[:6] + ".csv", "wb") as csvfile:
+    with open(data_dir + "review" + str(uuid.uuid4())[:6] + ".csv", "w") as csvfile:
         csvfile.write(tweet)
-        # writer = csv.writer(csvfile)
+                # writer = csv.writer(csvfile)
         # writer.writerows(tweet)
 
 

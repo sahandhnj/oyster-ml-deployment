@@ -8,22 +8,15 @@ cwd = os.getcwd()
 print(cwd)
 
 
-with open("../../config/settings.yaml", 'r') as stream:
-    try:
-        settings = yaml.load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
-
-
 cwd = os.getcwd()
-data_dir = cwd + "/data/tweets/"
+data_dir = cwd + "/tweets/"
 
 tweet_files = os.listdir(data_dir)
 tweet = tweet_files[0]
 print(tweet)
 
 def feedstream(file, sleep=0.05, verbose=1, *args, **kwargs):
-    API_ENDPOINT = settings['model']['api_endpoint']
+    API_ENDPOINT = "localhost:5001/predict"
     headers = None
     filecontent = open(data_dir + file)
     # payload = {"data": open("tweet.csv")}

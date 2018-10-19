@@ -24,13 +24,16 @@ func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath stri
 		Tty:          true,
 		AttachStderr: true,
 		AttachStdout: true,
+		ExposedPorts: nat.PortSet{
+			nat.Port("5000"): {},
+		},
 		// Labels: map[string]string{
 		// 	"rsc": hostName,
 		// },
 	}, &container.HostConfig{
 		AutoRemove: false,
 		PortBindings: nat.PortMap{
-			nat.Port("5000/tcp"): []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: port}},
+			nat.Port("5000"): []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: port}},
 		},
 		Mounts: []mount.Mount{
 			{

@@ -24,3 +24,6 @@ dog.jpg
 **/*.pys
 debug/model
 debug/.oyster
+debug/model2
+mlpipe/runs/sentiment_analysis/tweets
+mlpipe/runs/sentiment_analysis/apivenv
