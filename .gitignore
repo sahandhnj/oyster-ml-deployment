@@ -24,7 +24,6 @@ dump.rdb
 
 ### Misc. ###
 data/
-model/
 refs/
 dog.jpg
 *.pys
@@ -35,3 +34,4 @@ debug/model2
 mlpipe/runs/sentiment_analysis/tweets
 mlpipe/runs/sentiment_analysis/apivenv
 refs/
+debug/keraspipeline

@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/sahandhnj/apiclient/backend"
+
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/service"
@@ -79,15 +81,18 @@ func main() {
 			Usage:   "development control",
 			Subcommands: []cli.Command{
 				{
-					Name:  "status",
+					Name:  "server",
 					Usage: "check status of version",
 					Action: func(c *cli.Context) error {
-						dc := docker.NewDockerCli()
-						err := dc.ListContainers()
+						server := &backend.Server{
+							Address: ":3000",
+						}
+
+						err := server.Start()
 						if err != nil {
 							log.Fatal(err)
 						}
-						
+
 						return nil
 					},
 				},
