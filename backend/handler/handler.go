@@ -13,7 +13,7 @@ type Handler struct {
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case strings.HasPrefix(r.URL.Path, "/api/model"):
+	case strings.HasPrefix(r.URL.Path, "/api"):
 		http.StripPrefix("/api", h.Model).ServeHTTP(w, r)
 	}
 }
