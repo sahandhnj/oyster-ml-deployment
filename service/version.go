@@ -87,15 +87,20 @@ func (vs *VersionService) NewVersion() error {
 	return nil
 }
 
-func (vs *VersionService) PrintVersions() error {
+func (vs *VersionService) PrintVersions(dcli *docker.DockerCli) error {
 	versions, err := vs.DBHandler.VersionService.VersionsByModelId(vs.Model.ID)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag")
+	fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag", "Model State", "Redis State")
 	for _, ver := range versions {
-		fmt.Printf("%s\t%d\t%t\t\t%s\n", ver.Name, ver.VersionNumber, ver.Deployed, ver.ImageTag)
+		status, err := vs.Status(ver.VersionNumber, dcli)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s\t%d\t%t\t\t%s\t%s\t\t%s\n", ver.Name, ver.VersionNumber, ver.Deployed, ver.ImageTag, status.ModelState, status.RedisState)
 	}
 
 	return nil
@@ -172,9 +177,43 @@ func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verb
 		dcli.ConnectToNetwork(networkId, redisContainerId)
 	}
 
+	version.Deployed = true
 	vs.DBHandler.VersionService.UpdateVersion(version.ID, version)
 
 	return nil
+}
+
+type VersionState struct {
+	ModelState string
+	RedisState string
+}
+
+func (vs *VersionService) Status(versionNumber int, dcli *docker.DockerCli) (*VersionState, error) {
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	modelState, err := dcli.IsContainerRunning(version.ContainerId)
+	if err != nil {
+		return nil, err
+	}
+
+	versionState := VersionState{
+		ModelState: modelState,
+	}
+
+	if version.RedisEnabled {
+		redisState, err := dcli.IsContainerRunning(version.RedisContainerId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		versionState.RedisState = redisState
+	}
+
+	return &versionState, nil
 }
 
 func (vs *VersionService) Start(versionNumber int, dcli *docker.DockerCli) error {

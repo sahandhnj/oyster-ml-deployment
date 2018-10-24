@@ -36,16 +36,18 @@ func NewDockerCli() *DockerCli {
 	return &DockerCli{cli}
 }
 
-func (c *DockerCli) ListContainers() {
-	containers, err := c.cli.ContainerList(context.Background(), types.ContainerListOptions{})
+func (c *DockerCli) ListContainers() error {
+	containers, err := c.cli.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for _, container := range containers {
-		fmt.Println(container.Names)
+		fmt.Println("ContainerID:" + container.ID)
 	}
+
+	return nil
 }
 
 func (c *DockerCli) ListStackContainers(prjname string) []string {

@@ -74,6 +74,26 @@ func main() {
 			},
 		},
 		{
+			Name:    "dev",
+			Aliases: []string{"d"},
+			Usage:   "development control",
+			Subcommands: []cli.Command{
+				{
+					Name:  "status",
+					Usage: "check status of version",
+					Action: func(c *cli.Context) error {
+						dc := docker.NewDockerCli()
+						err := dc.ListContainers()
+						if err != nil {
+							log.Fatal(err)
+						}
+						
+						return nil
+					},
+				},
+			},
+		},
+		{
 			Name:    "version",
 			Aliases: []string{"v"},
 			Usage:   "version control",
@@ -119,7 +139,8 @@ func main() {
 							log.Fatal(err)
 						}
 
-						err = versionService.PrintVersions()
+						dc := docker.NewDockerCli()
+						err = versionService.PrintVersions(dc)
 						if err != nil {
 							log.Fatal(err)
 						}

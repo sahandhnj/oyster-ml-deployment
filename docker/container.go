@@ -14,9 +14,60 @@ import (
 	"golang.org/x/net/context"
 )
 
+type ContainerState int
+
+const (
+	Created    ContainerState = 0
+	Running    ContainerState = 1
+	Paused     ContainerState = 2
+	Restarting ContainerState = 3
+	Removing   ContainerState = 4
+	Exited     ContainerState = 5
+	Dead       ContainerState = 6
+	Unknown    ContainerState = 7
+)
+
+func (st ContainerState) String() string {
+	states := [...]string{
+		"created",
+		"running",
+		"paused",
+		"restarting",
+		"removing",
+		"exited",
+		"dead"}
+
+	if st < Created || st > Dead {
+		return "Unknown"
+	}
+
+	return states[st]
+}
+
+func getState(str string) ContainerState {
+	switch str {
+	case "created":
+		return Created
+	case "running":
+		return Running
+	case "paused":
+		return Paused
+	case "restarting":
+		return Restarting
+	case "removing":
+		return Removing
+	case "exited":
+		return Exited
+	case "dead":
+		return Dead
+	default:
+		return Unknown
+	}
+}
+
 func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath string, port string) (string, error) {
 	ctx := context.Background()
-
+	redisIP := "generic_redis"
 	resp, err := c.cli.ContainerCreate(ctx, &container.Config{
 		Hostname: name,
 		// Domainname:   hostName,
@@ -26,6 +77,9 @@ func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath stri
 		AttachStdout: true,
 		ExposedPorts: nat.PortSet{
 			nat.Port("5000"): {},
+		},
+		Env: []string{
+			fmt.Sprintf("REDIS_HOST=http://%s:6379", redisIP),
 		},
 		// Labels: map[string]string{
 		// 	"rsc": hostName,
@@ -122,6 +176,22 @@ func (c *DockerCli) InspectContainer(id string) {
 	}
 
 	fmt.Println(json.Config)
+}
+
+func (c *DockerCli) IsContainerRunning(id string) (string, error) {
+	containers, err := c.cli.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, container := range containers {
+		if id == container.ID {
+			return getState(container.State).String(), nil
+		}
+	}
+
+	return "", nil
 }
 
 func (c *DockerCli) GetContainerImageName(id string) string {
