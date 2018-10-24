@@ -1,0 +1,31 @@
+flask:
+  host: 0.0.0.0
+  port: 5000
+  endpoint: '/predict'
+  debug: True
+  secret_key: 'super_secret_key'
+redis:
+  host: 'redis-generic'
+  port: 6379
+  db: 0
+data_stream:
+  data_queue: "data_queue"
+  batch_size: 32
+  server_sleep: 0.25
+  client_sleep: 0.25
+  allowed_extensions:
+    - 'txt'
+    - 'csv'
+    - 'tsv'
+    - 'png'
+    - 'jpg'
+    - 'jpeg'
+    - 'json'
+model:
+  module: 'keras'
+  pathdir: "/model/"
+  graph_file: "model.json"
+  weights_file: "model_weights.h5"
+  api_endpoint: "http://localhost:5000/predict"
+
+
