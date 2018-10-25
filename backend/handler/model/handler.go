@@ -33,7 +33,7 @@ func (handler *Handler) helloWorldHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (handler *Handler) handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
-	url := "http://127.0.0.1:5001/predict"
+	url := "http://127.0.0.1:5001"
 
 	serveReverseProxy(url, res, req)
 }
@@ -42,10 +42,17 @@ func serveReverseProxy(target string, res http.ResponseWriter, req *http.Request
 	url, _ := url.Parse(target)
 	proxy := httputil.NewSingleHostReverseProxy(url)
 
-	req.URL.Host = url.Host
-	req.URL.Scheme = url.Scheme
-	req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
-	req.Host = url.Host
+	req.URL.Path = "/predict"
+	// req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
+	// req.Host = url.Host
+	req.RequestURI = "/t"
+
+	fmt.Println(url)
+	fmt.Println(url.Host)
+	fmt.Println(url.Scheme)
+	fmt.Println(req.Header.Get("Host"))
+	fmt.Println("----------")
+	fmt.Printf("%+v\n", req)
 
 	proxy.ServeHTTP(res, req)
 }
