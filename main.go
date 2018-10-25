@@ -85,7 +85,8 @@ func main() {
 					Usage: "check status of version",
 					Action: func(c *cli.Context) error {
 						server := &backend.Server{
-							Address: ":3000",
+							Address:   ":3000",
+							DbHandler: dbhandler,
 						}
 
 						err := server.Start()
