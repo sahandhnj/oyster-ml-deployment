@@ -118,3 +118,12 @@ func (ms *ModelService) GetAll() ([]*ModelExtended, error) {
 
 	return me, nil
 }
+
+func (ms *ModelService) GetByName(modelName string) (*types.Model, error) {
+	model, err := ms.DBHandler.ModelService.ModelByName(modelName)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}

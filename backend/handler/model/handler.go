@@ -34,10 +34,32 @@ func NewHandler(dbHandler *db.DBStore, vs *service.VersionService, ms *service.M
 
 	fmt.Println("Setting up Model routes")
 	h.Handle("/model/test", middleware.Chain(h.helloWorldHandler, middleware.Logging())).Methods("GET")
-	h.Handle("/model/{modelname}/version/{versionNumber}", middleware.Chain(h.proxyToApi, middleware.Logging()))
-	h.Handle("/model/all", middleware.Chain(h.getAllModels, middleware.Logging())).Methods("GET")
+	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging())).Methods("POST")
+	h.Handle("/model", middleware.Chain(h.getAllModels, middleware.Logging())).Methods("GET")
+	h.Handle("/model/{modelId}/v", middleware.Chain(h.getVersions, middleware.Logging())).Methods("GET")
 
 	return h
+}
+
+func (handler *Handler) getVersions(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	modelId, err := strconv.Atoi(vars["modelId"])
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	models, err := handler.VersionService.GetAllVersions(modelId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	json, err := json.Marshal(models)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
 
 func (handler *Handler) getAllModels(w http.ResponseWriter, r *http.Request) {

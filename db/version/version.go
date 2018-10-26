@@ -93,8 +93,8 @@ func (s *Service) VersionByVersionNumber(versionNumber int, modelId int) (*types
 }
 
 func (s *Service) LatestVersion(modelId int) (*types.Version, error) {
-
 	var version *types.Version
+
 	err := s.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(BucketName))
 		cursor := bucket.Cursor()

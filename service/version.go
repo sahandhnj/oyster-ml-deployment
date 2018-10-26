@@ -88,6 +88,37 @@ func (vs *VersionService) NewVersion() error {
 	return nil
 }
 
+type VersionExtended struct {
+	types.Version
+	RedisState string
+	ModelState string
+}
+
+func (vs *VersionService) GetAllVersions(modelId int) ([]VersionExtended, error) {
+	versions, err := vs.DBHandler.VersionService.VersionsByModelId(modelId)
+	dc := docker.NewDockerCli()
+	ve := make([]VersionExtended, len(versions))
+
+	for i, v := range versions {
+		stat, err := vs.Status(v.VersionNumber, modelId, dc)
+		if err != nil {
+			return nil, err
+		}
+
+		ve[i] = VersionExtended{
+			Version:    v,
+			ModelState: stat.ModelState,
+			RedisState: stat.RedisState,
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ve, nil
+}
+
 func (vs *VersionService) PrintVersions(dcli *docker.DockerCli) error {
 	versions, err := vs.DBHandler.VersionService.VersionsByModelId(vs.Model.ID)
 	if err != nil {
@@ -96,7 +127,7 @@ func (vs *VersionService) PrintVersions(dcli *docker.DockerCli) error {
 
 	fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag", "Model State", "Redis State")
 	for _, ver := range versions {
-		status, err := vs.Status(ver.VersionNumber, dcli)
+		status, err := vs.Status(ver.VersionNumber, vs.Model.ID, dcli)
 		if err != nil {
 			return err
 		}
@@ -187,8 +218,8 @@ type VersionState struct {
 	RedisState string
 }
 
-func (vs *VersionService) Status(versionNumber int, dcli *docker.DockerCli) (*VersionState, error) {
-	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
+func (vs *VersionService) Status(versionNumber int, modelId int, dcli *docker.DockerCli) (*VersionState, error) {
+	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, modelId)
 	if err != nil {
 		return nil, err
 	}
@@ -235,8 +266,6 @@ func (vs *VersionService) Stop(versionNumber int, dcli *docker.DockerCli) error 
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", version)
-	fmt.Println(version.ContainerId)
 
 	if version.RedisEnabled {
 		dcli.ContainerStop(version.RedisContainerId)
