@@ -19,7 +19,7 @@ with open(mlpipe_root + "/settings.yaml", 'r') as stream:
 
 
 rdb = redis.StrictRedis(
-    host=settings['redis']['host'],
+    host=os.environ['REDIS_HOST'],
     port=settings['redis']['port'],
     db=settings['redis']['db']
 )

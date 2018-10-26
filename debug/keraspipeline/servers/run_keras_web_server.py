@@ -37,7 +37,7 @@ with open(mlpipe_root + "/settings.yaml", 'r') as stream:
 # numpy.random.seed(42)
 app = Flask(__name__)
 rdb = redis.StrictRedis(
-    host=settings['redis']['host'],
+    host=os.environ['REDIS_HOST'],
     port=settings['redis']['port'],
     db=settings['redis']['db']
 )

@@ -65,9 +65,9 @@ func getState(str string) ContainerState {
 	}
 }
 
-func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath string, port string) (string, error) {
+func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath string, port string, redisIP string) (string, error) {
 	ctx := context.Background()
-	redisIP := "generic_redis"
+
 	resp, err := c.cli.ContainerCreate(ctx, &container.Config{
 		Hostname: name,
 		// Domainname:   hostName,
@@ -79,7 +79,7 @@ func (c *DockerCli) CreateContainer(name string, imageTag string, mountPath stri
 			nat.Port("5000"): {},
 		},
 		Env: []string{
-			fmt.Sprintf("REDIS_HOST=http://%s:6379", redisIP),
+			fmt.Sprintf("REDIS_HOST=%s", redisIP),
 		},
 		// Labels: map[string]string{
 		// 	"rsc": hostName,

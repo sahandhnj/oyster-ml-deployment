@@ -140,14 +140,15 @@ func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verb
 	}
 
 	version.ImageTag = mainTag
-	containerName := vs.Model.Name + "" + strconv.Itoa(version.VersionNumber) + "-api"
+	containerName := vs.Model.Name + "-v" + strconv.Itoa(version.VersionNumber) + "-api"
+	redisContainerName := vs.Model.Name + "-v" + strconv.Itoa(version.VersionNumber) + "-redis"
 
 	mountPath, err := filepath.Abs(vs.file.GetStorePath(version.Name))
 	if err != nil {
 		return err
 	}
 
-	containerId, err := dcli.CreateContainer(containerName, version.ImageTag, mountPath, strconv.Itoa(version.Port))
+	containerId, err := dcli.CreateContainer(containerName, version.ImageTag, mountPath, strconv.Itoa(version.Port), redisContainerName)
 	if err != nil {
 		return err
 	}
@@ -155,9 +156,6 @@ func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verb
 	version.ContainerId = containerId
 
 	if version.RedisEnabled {
-		// redisContainerName := vs.Model.Name + "" + strconv.Itoa(version.VersionNumber) + "-redis"
-		redisContainerName := "redis-generic"
-
 		redisContainerId, err := dcli.CreateRedisContainer(redisContainerName)
 		if err != nil {
 			return err
