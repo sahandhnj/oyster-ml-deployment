@@ -263,6 +263,21 @@ func (vs *VersionService) DeleteAll(modelId int, dcli *docker.DockerCli) error {
 	return nil
 }
 
+func (vs *VersionService) LatestVersionNumber(modelId int) (int, error) {
+	versionNumber := 0
+	version, err := vs.DBHandler.VersionService.LatestVersion(modelId)
+
+	if err != nil {
+		return versionNumber, err
+	}
+
+	if version != nil {
+		versionNumber = version.VersionNumber
+	}
+
+	return versionNumber, nil
+}
+
 func (vs *VersionService) Down(versionNumber int, dcli *docker.DockerCli, easy bool) error {
 	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
 	if err != nil {

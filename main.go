@@ -120,6 +120,8 @@ func main() {
 							log.Fatal(err)
 						}
 
+						modelservice.VersionService = versionService
+
 						server := &backend.Server{
 							Address:        ":3000",
 							DbHandler:      dbhandler,
@@ -131,6 +133,25 @@ func main() {
 						if err != nil {
 							log.Fatal(err)
 						}
+
+						return nil
+					},
+				},
+				{
+					Name:  "test",
+					Usage: "test new features",
+					Action: func(c *cli.Context) error {
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						// versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						// if err != nil {
+						// 	log.Fatal(err)
+						// }
+
+						modelservice.GetAll()
 
 						return nil
 					},

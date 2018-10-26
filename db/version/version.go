@@ -92,6 +92,37 @@ func (s *Service) VersionByVersionNumber(versionNumber int, modelId int) (*types
 	return version, err
 }
 
+func (s *Service) LatestVersion(modelId int) (*types.Version, error) {
+
+	var version *types.Version
+	err := s.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(BucketName))
+		cursor := bucket.Cursor()
+
+		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
+			var t types.Version
+			err := util.UnmarshalJsonObject(v, &t)
+			if err != nil {
+				return err
+			}
+
+			if t.ModelID == modelId {
+				if version == nil || t.VersionNumber > version.VersionNumber {
+					version = &t
+				}
+			}
+		}
+
+		if version == nil {
+			return util.GetError(util.ErrNotFound)
+		}
+
+		return nil
+	})
+
+	return version, err
+}
+
 func (s *Service) VersionByName(name string) (*types.Version, error) {
 	var version *types.Version
 

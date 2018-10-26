@@ -19,7 +19,7 @@ type Server struct {
 }
 
 func (server *Server) Start() error {
-	model := model.NewHandler(server.DbHandler)
+	model := model.NewHandler(server.DbHandler, server.VersionService, server.ModelService)
 
 	server.Handler = &handler.Handler{
 		Model: model,

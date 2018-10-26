@@ -91,3 +91,30 @@ func (ms *ModelService) Truncate(modelId int, dcli *docker.DockerCli) error {
 
 	return nil
 }
+
+type ModelExtended struct {
+	*types.Model
+	Version int
+}
+
+func (ms *ModelService) GetAll() ([]*ModelExtended, error) {
+	models, err := ms.DBHandler.ModelService.Models()
+	if err != nil {
+		return nil, err
+	}
+
+	me := make([]*ModelExtended, len(models))
+	for i, m := range models {
+		vLatest, err := ms.VersionService.LatestVersionNumber(m.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		me[i] = &ModelExtended{
+			Model:   &m,
+			Version: vLatest,
+		}
+	}
+
+	return me, nil
+}
