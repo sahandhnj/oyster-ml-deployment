@@ -76,6 +76,32 @@ func main() {
 			},
 		},
 		{
+			Name:    "truncate",
+			Aliases: []string{"tr"},
+			Usage:   "delete all versions of a model and the model itself",
+			Action: func(c *cli.Context) error {
+				modelservice, err := service.NewModelService(nil, dbhandler)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+				if err != nil {
+					log.Fatal(err)
+				}
+				modelservice.VersionService = versionService
+
+				dc := docker.NewDockerCli()
+
+				err = modelservice.Truncate(modelservice.Model.ID, dc)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				return nil
+			},
+		},
+		{
 			Name:    "dev",
 			Aliases: []string{"d"},
 			Usage:   "development control",
@@ -84,12 +110,24 @@ func main() {
 					Name:  "server",
 					Usage: "check status of version",
 					Action: func(c *cli.Context) error {
-						server := &backend.Server{
-							Address:   ":3000",
-							DbHandler: dbhandler,
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
 						}
 
-						err := server.Start()
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						server := &backend.Server{
+							Address:        ":3000",
+							DbHandler:      dbhandler,
+							ModelService:   modelservice,
+							VersionService: versionService,
+						}
+
+						err = server.Start()
 						if err != nil {
 							log.Fatal(err)
 						}
@@ -288,7 +326,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						err = versionService.Down(vnum, dc)
+						err = versionService.Down(vnum, dc, false)
 						if err != nil {
 							log.Fatal(err)
 						}

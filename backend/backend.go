@@ -7,12 +7,15 @@ import (
 	"github.com/sahandhnj/apiclient/backend/handler"
 	"github.com/sahandhnj/apiclient/backend/handler/model"
 	"github.com/sahandhnj/apiclient/db"
+	"github.com/sahandhnj/apiclient/service"
 )
 
 type Server struct {
-	Address   string
-	Handler   *handler.Handler
-	DbHandler *db.DBStore
+	Address        string
+	Handler        *handler.Handler
+	DbHandler      *db.DBStore
+	VersionService *service.VersionService
+	ModelService   *service.ModelService
 }
 
 func (server *Server) Start() error {

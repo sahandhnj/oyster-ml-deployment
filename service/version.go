@@ -5,6 +5,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/sahandhnj/apiclient/docker"
 
@@ -234,6 +235,8 @@ func (vs *VersionService) Stop(versionNumber int, dcli *docker.DockerCli) error 
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%v\n", version)
+	fmt.Println(version.ContainerId)
 
 	if version.RedisEnabled {
 		dcli.ContainerStop(version.RedisContainerId)
@@ -244,26 +247,57 @@ func (vs *VersionService) Stop(versionNumber int, dcli *docker.DockerCli) error 
 	return nil
 }
 
-func (vs *VersionService) Down(versionNumber int, dcli *docker.DockerCli) error {
+func (vs *VersionService) DeleteAll(modelId int, dcli *docker.DockerCli) error {
+	versions, err := vs.DBHandler.VersionService.VersionsByModelId(modelId)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range versions {
+		err = vs.Down(v.ID, dcli, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (vs *VersionService) Down(versionNumber int, dcli *docker.DockerCli, easy bool) error {
 	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
 	if err != nil {
 		return err
 	}
 
 	if version.RedisEnabled {
-		dcli.ContainerDelete(version.RedisContainerId)
-		version.RedisContainerId = ""
+		err = dcli.ContainerDelete(version.RedisContainerId)
+		if err != nil {
+			fmt.Println(err.Error())
+			if !(easy && strings.Contains(err.Error(), "No such container")) {
+				return err
+			}
+		}
 	}
 
-	dcli.ContainerDelete(version.ContainerId)
-	version.ContainerId = ""
+	err = dcli.ContainerDelete(version.ContainerId)
+	if err != nil {
+		if !(easy && strings.Contains(err.Error(), "No such container")) {
+			return err
+		}
+	}
 
 	if version.NetworkId != "" {
-		dcli.NetworkDelete(version.NetworkId)
-		version.NetworkId = ""
+		err = dcli.NetworkDelete(version.NetworkId)
+		if err != nil {
+			fmt.Println(err)
+
+			if !(easy && strings.Contains(err.Error(), "No such network")) {
+				return err
+			}
+		}
 	}
 
-	vs.DBHandler.VersionService.UpdateVersion(version.ID, version)
+	vs.DBHandler.VersionService.DeleteVersion(version.ID)
 
 	return nil
 }

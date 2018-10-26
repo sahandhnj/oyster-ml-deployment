@@ -4,15 +4,17 @@ import (
 	"errors"
 
 	"github.com/sahandhnj/apiclient/db"
+	"github.com/sahandhnj/apiclient/docker"
 	"github.com/sahandhnj/apiclient/filemanager"
 	"github.com/sahandhnj/apiclient/types"
 	"github.com/sahandhnj/apiclient/util"
 )
 
 type ModelService struct {
-	Model     *types.Model
-	file      *filemanager.FileStoreManager
-	DBHandler *db.DBStore
+	Model          *types.Model
+	file           *filemanager.FileStoreManager
+	DBHandler      *db.DBStore
+	VersionService *VersionService
 }
 
 func NewModelService(model *types.Model, dbHandler *db.DBStore) (*ModelService, error) {
@@ -74,4 +76,18 @@ func ReadModel() (*types.Model, error) {
 	}
 
 	return &model, nil
+}
+
+func (ms *ModelService) Truncate(modelId int, dcli *docker.DockerCli) error {
+	err := ms.VersionService.DeleteAll(modelId, dcli)
+	if err != nil {
+		return err
+	}
+
+	err = ms.DBHandler.ModelService.DeleteModel(modelId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
