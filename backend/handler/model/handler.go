@@ -33,10 +33,10 @@ func NewHandler(dbHandler *db.DBStore, vs *service.VersionService, ms *service.M
 	}
 
 	fmt.Println("Setting up Model routes")
-	h.Handle("/model/test", middleware.Chain(h.helloWorldHandler, middleware.Logging())).Methods("GET")
-	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging())).Methods("POST")
-	h.Handle("/model", middleware.Chain(h.getAllModels, middleware.Logging())).Methods("GET")
-	h.Handle("/model/{modelId}/v", middleware.Chain(h.getVersions, middleware.Logging())).Methods("GET")
+	h.Handle("/model/test", middleware.Chain(h.helloWorldHandler, middleware.Logging(), middleware.LogReq())).Methods("GET")
+	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging(), middleware.LogReq())).Methods("POST")
+	h.Handle("/model", middleware.Chain(h.getAllModels, middleware.Logging(), middleware.LogReq())).Methods("GET")
+	h.Handle("/model/{modelId}/v", middleware.Chain(h.getVersions, middleware.Logging(), middleware.LogReq())).Methods("GET")
 
 	return h
 }

@@ -11,9 +11,11 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc
 func Logging() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			reqID := requestIDFromContext(r.Context())
 			start := time.Now()
+
 			defer func() {
-				log.Println(r.URL.Path, time.Since(start))
+				log.Println(r.URL.Path, time.Since(start), reqID)
 			}()
 			f(w, r)
 		}
@@ -29,6 +31,15 @@ func Method(m string) Middleware {
 			}
 
 			f(w, r)
+		}
+	}
+}
+
+func LogReq() Middleware {
+	return func(f http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ctx := newContextWithRequestID(r.Context(), r)
+			f(w, r.WithContext(ctx))
 		}
 	}
 }
