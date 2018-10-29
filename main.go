@@ -121,12 +121,14 @@ func main() {
 						}
 
 						modelservice.VersionService = versionService
+						reqservice := service.NewReqService(modelservice, versionService, dbhandler)
 
 						server := &backend.Server{
 							Address:        ":3000",
 							DbHandler:      dbhandler,
 							ModelService:   modelservice,
 							VersionService: versionService,
+							ReqService:     reqservice,
 						}
 
 						err = server.Start()

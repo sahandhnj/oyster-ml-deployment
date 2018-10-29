@@ -8,6 +8,7 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/sahandhnj/apiclient/db/model"
+	"github.com/sahandhnj/apiclient/db/req"
 	"github.com/sahandhnj/apiclient/db/version"
 )
 
@@ -22,6 +23,7 @@ type DBStore struct {
 	db             *bolt.DB
 	ModelService   *model.Service
 	VersionService *version.Service
+	ReqService     *req.Service
 }
 
 func NewDBStore() (*DBStore, error) {
@@ -85,6 +87,13 @@ func (d *DBStore) initServices() error {
 	}
 
 	d.VersionService = versionDBService
+
+	reqDBService, err := req.NewService(d.db)
+	if err != nil {
+		return err
+	}
+
+	d.ReqService = reqDBService
 
 	return nil
 }

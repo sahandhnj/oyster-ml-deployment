@@ -22,19 +22,21 @@ type Handler struct {
 	DbHandler      *db.DBStore
 	VersionService *service.VersionService
 	ModelService   *service.ModelService
+	ReqService     *service.ReqService
 }
 
-func NewHandler(dbHandler *db.DBStore, vs *service.VersionService, ms *service.ModelService) *Handler {
+func NewHandler(dbHandler *db.DBStore, vs *service.VersionService, ms *service.ModelService, rs *service.ReqService) *Handler {
 	h := &Handler{
 		Router:         mux.NewRouter(),
 		DbHandler:      dbHandler,
 		VersionService: vs,
 		ModelService:   ms,
+		ReqService:     rs,
 	}
 
 	fmt.Println("Setting up Model routes")
 	h.Handle("/model/test", middleware.Chain(h.helloWorldHandler, middleware.Logging(), middleware.LogReq())).Methods("GET")
-	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging(), middleware.LogReq()))
+	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging(), middleware.VersionLogging(h.ReqService)))
 	h.Handle("/model", middleware.Chain(h.getAllModels, middleware.Logging(), middleware.LogReq())).Methods("GET")
 	h.Handle("/model/{modelId}/v", middleware.Chain(h.getVersions, middleware.Logging(), middleware.LogReq())).Methods("GET")
 

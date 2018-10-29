@@ -58,6 +58,20 @@ func NewModelService(model *types.Model, dbHandler *db.DBStore) (*ModelService, 
 	return &modelService, nil
 }
 
+func NewMS(dbHandler *db.DBStore) (*ModelService, error) {
+	file, err := filemanager.NewFileStoreManager()
+	if err != nil {
+		return nil, err
+	}
+
+	modelService := ModelService{
+		file:      file,
+		DBHandler: dbHandler,
+	}
+
+	return &modelService, nil
+}
+
 func ReadModel() (*types.Model, error) {
 	file, err := filemanager.NewFileStoreManager()
 	if err != nil {

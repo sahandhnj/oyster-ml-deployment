@@ -16,10 +16,11 @@ type Server struct {
 	DbHandler      *db.DBStore
 	VersionService *service.VersionService
 	ModelService   *service.ModelService
+	ReqService     *service.ReqService
 }
 
 func (server *Server) Start() error {
-	model := model.NewHandler(server.DbHandler, server.VersionService, server.ModelService)
+	model := model.NewHandler(server.DbHandler, server.VersionService, server.ModelService, server.ReqService)
 
 	server.Handler = &handler.Handler{
 		Model: model,
