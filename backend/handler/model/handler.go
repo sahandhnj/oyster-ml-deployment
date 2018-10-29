@@ -34,7 +34,7 @@ func NewHandler(dbHandler *db.DBStore, vs *service.VersionService, ms *service.M
 
 	fmt.Println("Setting up Model routes")
 	h.Handle("/model/test", middleware.Chain(h.helloWorldHandler, middleware.Logging(), middleware.LogReq())).Methods("GET")
-	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging(), middleware.LogReq())).Methods("POST")
+	h.Handle("/model/{modelname}/v/{versionNumber}/predict", middleware.Chain(h.proxyToApi, middleware.Logging(), middleware.LogReq()))
 	h.Handle("/model", middleware.Chain(h.getAllModels, middleware.Logging(), middleware.LogReq())).Methods("GET")
 	h.Handle("/model/{modelId}/v", middleware.Chain(h.getVersions, middleware.Logging(), middleware.LogReq())).Methods("GET")
 
@@ -94,6 +94,10 @@ func (handler *Handler) proxyToApi(res http.ResponseWriter, req *http.Request) {
 	version, err := handler.VersionService.DBHandler.VersionService.VersionByVersionNumber(versionNumber, model.ID)
 
 	url := "http://127.0.0.1:" + strconv.Itoa(version.Port)
+	if version.CloudURL != "" {
+		url = "http://" + version.CloudURL + ":"
+	}
+
 	serveReverseProxy(url, res, req)
 }
 

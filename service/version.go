@@ -125,19 +125,35 @@ func (vs *VersionService) PrintVersions(dcli *docker.DockerCli) error {
 		return err
 	}
 
-	fmt.Printf("%s\t%s\t%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag", "Model State", "Redis State")
+	fmt.Printf("%s\t%s\t%s\t%s\t\t%s\t%s\t%s\t%s\n", "Name", "Version number", "Deployed", "Image Tag", "Model State", "Redis State", "Cloud", "API Endpoint")
 	for _, ver := range versions {
 		status, err := vs.Status(ver.VersionNumber, vs.Model.ID, dcli)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("%s\t%d\t%t\t\t%s\t%s\t\t%s\n", ver.Name, ver.VersionNumber, ver.Deployed, ver.ImageTag, status.ModelState, status.RedisState)
+		cloud := "t\t  NO"
+		if ver.CloudURL != "" {
+			cloud = "\t\t\t Yes"
+		}
+
+		fmt.Printf("%s\t%d\t%t\t\t%s\t%s\t\t%s\t%s\t%s\n", ver.Name, ver.VersionNumber, ver.Deployed, ver.ImageTag, status.ModelState, status.RedisState, cloud, fmt.Sprintf("localhost:3000/api/model/%s/v/%d/predict", vs.Model.Name, ver.VersionNumber))
 	}
 
 	return nil
 }
 
+func (vs *VersionService) DeployProd(dcli *docker.DockerCli, cloudURL string) error {
+	err := vs.NewVersion()
+	if err != nil {
+		return err
+	}
+
+	vs.Version.CloudURL = cloudURL
+	vs.DBHandler.VersionService.UpdateVersion(vs.Version.ID, vs.Version)
+
+	return nil
+}
 func (vs *VersionService) Deploy(versionNumber int, dcli *docker.DockerCli, verbose bool) error {
 	version, err := vs.DBHandler.VersionService.VersionByVersionNumber(versionNumber, vs.Model.ID)
 	if err != nil {

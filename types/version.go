@@ -16,6 +16,7 @@ type Version struct {
 	RedisContainerId string `json:"redis_container_id"`
 	NetworkId        string `json:"network_id"`
 	Port             int    `json:"port"`
+	CloudURL         string `json:"cloud_url"`
 }
 
 const (

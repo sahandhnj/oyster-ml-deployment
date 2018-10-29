@@ -255,6 +255,41 @@ func main() {
 					},
 				},
 				{
+					Name:  "deploy-prod",
+					Usage: "deploy production to cloud",
+					Action: func(c *cli.Context) error {
+						cloudURL := c.Args().Get(0)
+						if cloudURL == "" {
+							log.Fatal("You have to the cloud end point")
+						}
+
+						modelservice, err := service.NewModelService(nil, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						dc := docker.NewDockerCli(nil)
+
+						err = versionService.DeployProd(dc, cloudURL)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						return nil
+					},
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "verbose",
+							Value: "false",
+						},
+					},
+				},
+				{
 					Name:  "start",
 					Usage: "start containers of version",
 					Action: func(c *cli.Context) error {
