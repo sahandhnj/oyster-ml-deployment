@@ -26,11 +26,22 @@ type DockerCli struct {
 	cli *client.Client
 }
 
-func NewDockerCli() *DockerCli {
-	cli, err := client.NewClientWithOpts(client.WithVersion("1.38"))
+type DockerCliParams struct {
+	Host    string
+	Version string
+}
 
+func NewDockerCli(params *DockerCliParams) *DockerCli {
+	cli, err := client.NewClientWithOpts(client.WithVersion("1.38"))
 	if err != nil {
 		panic(err)
+	}
+
+	if params != nil {
+		cli, err = client.NewClientWithOpts(client.WithHost(params.Host), client.WithVersion(params.Version))
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return &DockerCli{cli}

@@ -96,7 +96,7 @@ type VersionExtended struct {
 
 func (vs *VersionService) GetAllVersions(modelId int) ([]VersionExtended, error) {
 	versions, err := vs.DBHandler.VersionService.VersionsByModelId(modelId)
-	dc := docker.NewDockerCli()
+	dc := docker.NewDockerCli(nil)
 	ve := make([]VersionExtended, len(versions))
 
 	for i, v := range versions {

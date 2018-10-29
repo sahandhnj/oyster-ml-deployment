@@ -23,7 +23,7 @@ tweet = tweet_files[0]
 print(tweet)
 
 def feedstream(file, sleep=0.05, verbose=1, *args, **kwargs):
-    API_ENDPOINT = "http://localhost:5001/predict"
+    API_ENDPOINT = "http://35.204.124.161/predict"
     headers = None
     filecontent = open(data_dir + file)
     # payload = {"data": open("tweet.csv")}

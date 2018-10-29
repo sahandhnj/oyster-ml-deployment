@@ -91,7 +91,7 @@ func main() {
 				}
 				modelservice.VersionService = versionService
 
-				dc := docker.NewDockerCli()
+				dc := docker.NewDockerCli(nil)
 
 				err = modelservice.Truncate(modelservice.Model.ID, dc)
 				if err != nil {
@@ -141,17 +141,18 @@ func main() {
 					Name:  "test",
 					Usage: "test new features",
 					Action: func(c *cli.Context) error {
-						modelservice, err := service.NewModelService(nil, dbhandler)
+						dc := docker.NewDockerCli(&docker.DockerCliParams{
+							Host:    "tcp://192.168.99.100:2376",
+							Version: "1.35",
+						})
 						if err != nil {
 							log.Fatal(err)
 						}
 
-						// versionService, err := service.NewVersionService(modelservice.Model, dbhandler)
-						// if err != nil {
-						// 	log.Fatal(err)
-						// }
-
-						modelservice.GetAll()
+						err := dc.ListContainers()
+						if err != nil {
+							log.Fatal(err)
+						}
 
 						return nil
 					},
@@ -204,7 +205,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						dc := docker.NewDockerCli()
+						dc := docker.NewDockerCli(nil)
 						err = versionService.PrintVersions(dc)
 						if err != nil {
 							log.Fatal(err)
@@ -232,7 +233,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						dc := docker.NewDockerCli()
+						dc := docker.NewDockerCli(nil)
 
 						vnum, err := strconv.Atoi(versionNumber)
 						if err != nil {
@@ -272,7 +273,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						dc := docker.NewDockerCli()
+						dc := docker.NewDockerCli(nil)
 
 						vnum, err := strconv.Atoi(versionNumber)
 						if err != nil {
@@ -306,7 +307,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						dc := docker.NewDockerCli()
+						dc := docker.NewDockerCli(nil)
 
 						vnum, err := strconv.Atoi(versionNumber)
 						if err != nil {
@@ -340,7 +341,7 @@ func main() {
 							log.Fatal(err)
 						}
 
-						dc := docker.NewDockerCli()
+						dc := docker.NewDockerCli(nil)
 
 						vnum, err := strconv.Atoi(versionNumber)
 						if err != nil {
