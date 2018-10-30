@@ -63,6 +63,7 @@ func Method(m string) Middleware {
 func LogReq() Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			ctx := newContextWithRequestID(r.Context(), r)
 			f(w, r.WithContext(ctx))
 		}

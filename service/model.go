@@ -108,7 +108,8 @@ func (ms *ModelService) Truncate(modelId int, dcli *docker.DockerCli) error {
 
 type ModelExtended struct {
 	*types.Model
-	Version int
+	Version          int `json:"latest_version"`
+	NumberOfVersions int `json:"number_of_version"`
 }
 
 func (ms *ModelService) GetAll() ([]*ModelExtended, error) {
@@ -121,12 +122,19 @@ func (ms *ModelService) GetAll() ([]*ModelExtended, error) {
 	for i, m := range models {
 		vLatest, err := ms.VersionService.LatestVersionNumber(m.ID)
 		if err != nil {
-			return nil, err
+			vLatest = 0
+		}
+
+		versions, err := ms.VersionService.GetAllVersions(m.ID)
+		vNumber := 0
+		if err == nil {
+			vNumber = len(versions)
 		}
 
 		me[i] = &ModelExtended{
-			Model:   &m,
-			Version: vLatest,
+			Model:            &m,
+			Version:          vLatest,
+			NumberOfVersions: vNumber,
 		}
 	}
 

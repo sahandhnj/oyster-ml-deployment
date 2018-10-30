@@ -66,6 +66,7 @@ func (handler *Handler) getVersions(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handler) getAllModels(w http.ResponseWriter, r *http.Request) {
 	models, err := handler.ModelService.GetAll()
+	fmt.Println(models)
 	if err != nil {
 		fmt.Println(err)
 	}

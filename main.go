@@ -124,7 +124,7 @@ func main() {
 						reqservice := service.NewReqService(modelservice, versionService, dbhandler)
 
 						server := &backend.Server{
-							Address:        ":3000",
+							Address:        ":3001",
 							DbHandler:      dbhandler,
 							ModelService:   modelservice,
 							VersionService: versionService,
