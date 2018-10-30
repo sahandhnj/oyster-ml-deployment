@@ -96,19 +96,19 @@ type VersionExtended struct {
 
 func (vs *VersionService) GetAllVersions(modelId int) ([]VersionExtended, error) {
 	versions, err := vs.DBHandler.VersionService.VersionsByModelId(modelId)
-	//dc := docker.NewDockerCli(nil)
+	dc := docker.NewDockerCli(nil)
 	ve := make([]VersionExtended, len(versions))
 
 	for i, v := range versions {
-		// stat, err := vs.Status(v.VersionNumber, modelId, dc)
-		// if err != nil {
-		// 	return nil, err
-		// }
+		stat, err := vs.Status(v.VersionNumber, modelId, dc)
+		if err != nil {
+			return nil, err
+		}
 
 		ve[i] = VersionExtended{
 			Version:    v,
-			ModelState: "Faked",
-			RedisState: "Faked",
+			ModelState: stat.ModelState,
+			RedisState: stat.RedisState,
 		}
 	}
 
