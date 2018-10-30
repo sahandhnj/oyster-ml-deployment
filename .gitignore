@@ -28,12 +28,7 @@ refs/
 dog.jpg
 *.pys
 **/*.pys
-debug/model
 debug/.oyster
-debug/model2
-mlpipe/runs/sentiment_analysis/tweets
-mlpipe/runs/sentiment_analysis/apivenv
+mlpipe
 refs/
-debug/keraspipeline
 kubernetes/model
-mlpipe/runs/keras/sentiment_analysis
