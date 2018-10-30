@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/sahandhnj/apiclient/db"
 	"github.com/sahandhnj/apiclient/docker"
@@ -107,7 +108,7 @@ func (ms *ModelService) Truncate(modelId int, dcli *docker.DockerCli) error {
 }
 
 type ModelExtended struct {
-	*types.Model
+	types.Model
 	Version          int `json:"latest_version"`
 	NumberOfVersions int `json:"number_of_version"`
 }
@@ -132,10 +133,14 @@ func (ms *ModelService) GetAll() ([]*ModelExtended, error) {
 		}
 
 		me[i] = &ModelExtended{
-			Model:            &m,
+			Model:            m,
 			Version:          vLatest,
 			NumberOfVersions: vNumber,
 		}
+	}
+	for _, l := range me {
+		fmt.Printf("3-%v\n", l)
+
 	}
 
 	return me, nil
