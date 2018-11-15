@@ -31,17 +31,20 @@ After initiating an oyster project the configuration of the model and it's versi
 
 ### Prerequisites
 
- Docker
- Kubernetes
+- Docker
+- Kubernetes
 
 ## Deployment
+
 Trained model can be deployed into an API either locally in docker containers or on kubernetes cluster over multiple networks.
 
 ### resource
+
 resources are physical or containerized servers allocated for training and serving. Local or cloud kuberentes clusters can be added as resources.
 
 
 ### Version
+
 In order to deploy a model a version needs to be commited. Each version has its own state and can be deployed into different stages (train, test, api, batch).
 
 
@@ -58,8 +61,18 @@ $
 $ In order to setup authentication run command with --auth
 
 ```
+### API Manager
+Oyster acts as an API proxy with powerful features:
+- Authentication
+- Security
+- Rate limiting
+- Caching
+- Compression
+- Analytics
 
 ### Cloud
+oyster can train models or deploy them as applications or API across private, dedicated and multitenant public cloud infrastructures.
+
 In order to deploy models to cloud you can add kubernetes nodes as resources. It is also possible to configure oyster to scale up by creating more pods and nodes.
 
 ```
@@ -69,6 +82,7 @@ $ 8 new resources has been added.
 ```
 
 ### Oyster UI
+
 Oyster has a web user interface running as a service which can be enabled. You can see an overview of your models, versions and resources. 
 Also different metrics for each stage (train, test, API, batch).
 
@@ -78,6 +92,7 @@ $ oyster-server is running on 127.0.0.1:3550
 ```
 
 ## Versioning
+
 Currently oyster is in alpha version and is being tested and developed everyday. Regular updates are being released.
 
 ## Authors
