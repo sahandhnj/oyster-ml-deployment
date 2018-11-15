@@ -59,6 +59,15 @@ $ oyster k8 deploy -c glcoud
 $ 8 new resources has been added.
 ```
 
+### Oyster UI
+Oyster has a web user interface running as a service which can be enabled. You can see an overview of your models, versions and resources. 
+Also different metrics for each stage (train, test, api, batch).
+
+```
+$ oyster service run --background
+$ oyster-server is running on 127.0.0.1:3550
+```
+
 ## Versioning
 Currently oyster is in alpha version and is being tested and developed everyday. Regular updates are being released.
 
