@@ -50,17 +50,22 @@ In order to deploy a model a version needs to be commited. Each version has its 
 
 ```
 
+### Cloud
+In order to deploy models to cloud you can add kubernetes nodes as resources. It is also possible to configure oyster to scale up by creating more pods and nodes.
+
+```
+* oyster authenticate gcloud --authFile gcloud.yml
+* oyster k8 deploy -c glcoud 
+* 8 new resources has been added.
+```
 
 ## Versioning
-
-
+Currently oyster is in alpha version and is being tested and developed everyday. Regular updates are being released.
 
 ## Authors
 
 * **Sahand Hosseininejad**
 * **Bram Bloks**
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
