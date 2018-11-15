@@ -22,6 +22,7 @@ $ oyster init –modelPath keraspipeline –name sentiment
 After iniating an oyster project the configuration of the model and it's versions will be stored in .oyster.
 
 ### Prerequisites
+
 Docker
 Kubernetes
 
