@@ -8,6 +8,7 @@ Using schedulers you can prioritize your AI projects and make the most use of al
 
 Oyster uses different configuration setup to optimize the use resources. It enables GPU/CPU training/distributed training and multi threaded API servers.
 
+Oyster has a powerful API manager. It supports multiple format and implements authentication, caching, compression and collects various metrics.
 
 ## Getting Started
 
