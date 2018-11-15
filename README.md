@@ -31,8 +31,8 @@ After initiating an oyster project the configuration of the model and it's versi
 
 ### Prerequisites
 
-Docker
-Kubernetes
+ Docker
+ Kubernetes
 
 ## Deployment
 Trained model can be deployed into an API either locally in docker containers or on kubernetes cluster over multiple networks.
