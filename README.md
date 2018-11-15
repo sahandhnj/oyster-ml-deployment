@@ -6,17 +6,17 @@ Oyster is a tool to train, deploy as API and manage your ML models. Each ML mode
 
 In order to start an oyster project move to a parent directory of your model and execute the oyster init command. 
 ```
-* oyster init –modelPath kerasmodel –name sentiment
+$ oyster init –modelPath kerasmodel –name sentiment
 ```
 modelPath is the parent directory of the trained model and preprocessing functions.
 ```
-* ls kerasmodel
-* model.json  model_weights.h5  preprocessing.py
+$ ls kerasmodel
+$ model.json  model_weights.h5  preprocessing.py
 ````
 
 Below you can see the default file structure:
 ```
-* oyster init –modelPath keraspipeline –name sentiment
+$ oyster init –modelPath keraspipeline –name sentiment
 ```
 
 After iniating an oyster project the configuration of the model and it's versions will be stored in .oyster.
@@ -37,16 +37,16 @@ In order to deploy a model a version needs to be commited. Each version has its 
 
 
 ```
-* oyster version commit 
-* sentiment:v1 has been created. 
-*
-* oyster deploy --version 1 --resource local-docker --stage api
-* sentiment:v1 has been deployed.
-*
-* predict: /dep/sentiment/v1/predict
-* API traffic : /monitor/sentiment/v1/traffic?from=&to= 
-*
-* In order to setup auhtentication run command with --auth
+$ oyster version commit 
+$ sentiment:v1 has been created. 
+$
+$ oyster deploy --version 1 --resource local-docker --stage api
+$ sentiment:v1 has been deployed.
+$
+$ predict: /dep/sentiment/v1/predict
+$ API traffic : /monitor/sentiment/v1/traffic?from=&to= 
+$
+$ In order to setup auhtentication run command with --auth
 
 ```
 
@@ -54,9 +54,9 @@ In order to deploy a model a version needs to be commited. Each version has its 
 In order to deploy models to cloud you can add kubernetes nodes as resources. It is also possible to configure oyster to scale up by creating more pods and nodes.
 
 ```
-* oyster authenticate gcloud --authFile gcloud.yml
-* oyster k8 deploy -c glcoud 
-* 8 new resources has been added.
+$ oyster authenticate gcloud --authFile gcloud.yml
+$ oyster k8 deploy -c glcoud 
+$ 8 new resources has been added.
 ```
 
 ## Versioning
